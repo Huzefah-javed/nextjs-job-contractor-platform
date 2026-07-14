@@ -1,6 +1,6 @@
 export default function HeroSection() {
   return (
-    <div className="max-w-6xl mx-auto my-8 p-8 bg-white rounded-2xl shadow-sm flex flex-col md:flex-row items-center gap-8">
+    <div className="max-w-6xl mx-auto my-8 p-8 bg-white rounded-2xl shadow-2xl flex flex-col md:flex-row items-center gap-8">
       <div className="flex-1">
         <h1 className="text-4xl font-bold text-gray-800 leading-tight">
           Built for Clarity,{" "}
@@ -41,7 +41,7 @@ export default function HeroSection() {
       <div className="flex-1 max-w-md">
         <img
           src="/hero.png"
-          alt="Hero Illustration"
+          alt="Hero Illustration"f
           className="w-full object-contain"
         />
       </div>

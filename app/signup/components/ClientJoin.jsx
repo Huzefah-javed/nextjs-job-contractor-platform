@@ -1,0 +1,130 @@
+import { userSignupAction } from "@/serverActions/signup";
+import React, { useActionState, useState } from "react";
+
+export default function ClientJoin() {
+  const [state, formAction, isPending] = useActionState(userSignupAction, {});
+
+  return (
+    <section className="max-w-3xl mx-auto my-12 px-6 py-10 bg-[#FAFAFA] border border-gray-100 rounded-3xl font-sans">
+      <h2 className="text-2xl md:text-3xl font-extrabold text-gray-800 text-center tracking-wide uppercase mb-8">
+        Sign Up to Hire Verified Contractors
+      </h2>
+
+      <form action={formAction} className="max-w-2xl mx-auto space-y-5">
+        <div className="">
+          <div className="flex flex-col gap-1.5">
+            <label className="text-sm font-semibold text-gray-700">Name</label>
+            <input
+              type="text"
+              name="name"
+              placeholder="Enter your Name"
+              className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 placeholder-gray-300"
+              required
+            />
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <label className="text-sm font-semibold text-gray-700">
+            Business Email Address
+          </label>
+          <input
+            type="email"
+            name="businessEmail"
+            placeholder="Enter your business email"
+            value={formData.businessEmail}
+            onChange={handleChange}
+            className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 placeholder-gray-300"
+            required
+          />
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <label className="text-sm font-semibold text-gray-700">
+            Password
+          </label>
+          <input
+            type="password"
+            name="password"
+            placeholder="**********"
+            className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 placeholder-gray-300"
+            required
+          />
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <label className="text-sm font-semibold text-gray-700">
+            Primary Region
+          </label>
+          <input
+            type="text"
+            name="primaryRegion"
+            placeholder="California (Default)"
+            className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 placeholder-gray-300"
+            required
+          />
+        </div>
+
+        <div className="space-y-3 pt-3">
+          <label className="flex items-start gap-3 cursor-pointer text-xs text-gray-600 select-none leading-relaxed">
+            <input
+              type="checkbox"
+              name="sendUpdates"
+              className="mt-0.5 rounded border-gray-300 text-green-600 focus:ring-green-500"
+            />
+            <span>
+              Send me platform updates and hiring insights for construction
+              projects.
+            </span>
+          </label>
+
+          {/* Terms Checkbox */}
+          <label className="flex items-start gap-3 cursor-pointer text-xs text-gray-600 select-none leading-relaxed">
+            <input
+              type="checkbox"
+              name="agreeTerms"
+              checked={formData.agreeTerms}
+              onChange={handleChange}
+              className="mt-0.5 rounded border-gray-300 text-green-600 focus:ring-green-500"
+              required
+            />
+            <span>
+              Yes, I agree to the Project Contract Connect Terms of Service,{" "}
+              <a
+                href="#agreement"
+                className="green-txt hover:underline font-semibold"
+              >
+                User Agreement
+              </a>
+              , and{" "}
+              <a
+                href="#privacy"
+                className="green-txt hover:underline font-semibold"
+              >
+                Privacy Policy
+              </a>
+              .
+            </span>
+          </label>
+        </div>
+
+        <div className="flex justify-center pt-4">
+          <button
+            type="submit"
+            className="w-full max-w-xs py-3 bg-[#16A34A] text-white rounded-full font-semibold text-sm hover:bg-[#15803D] transition-colors shadow-sm"
+          >
+           {isPending? "Creating ......" : "Create Client Account"}
+          </button>
+        </div>
+
+        {/* Sign In Footer */}
+        <p className="text-center text-xs text-gray-400 mt-2">
+          Already have an account?{" "}
+          <a href="#login" className="green-txt font-semibold hover:underline">
+            Login!
+          </a>
+        </p>
+      </form>
+    </section>
+  );
+}
