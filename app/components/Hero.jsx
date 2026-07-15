@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 export default function HeroSection() {
   return (
     <div className="max-w-6xl mx-auto my-8 p-8 bg-white rounded-2xl shadow-2xl flex flex-col md:flex-row items-center gap-8">
@@ -39,9 +41,12 @@ export default function HeroSection() {
       </div>
 
       <div className="flex-1 max-w-md">
-        <img
+        <Image
           src="/hero.png"
-          alt="Hero Illustration"f
+          width="200"
+          height="200"
+          loading="lazy"
+          alt="Hero Illustration"
           className="w-full object-contain"
         />
       </div>

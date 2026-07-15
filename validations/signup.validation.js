@@ -17,4 +17,5 @@ export const signupSchema = z.object({
     .string()
     .min(2, { message: "Region must be at least 2 characters" })
     .trim(),
+    role: z.enum(["client", "freelancer"])
 });

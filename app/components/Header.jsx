@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function Header() {
   return (
     <header className="w-full bg-white border border-[#6D28D9] px-6 py-4 flex items-center justify-between font-sans">
@@ -46,9 +48,12 @@ export default function Header() {
             Sign in
           </button>
 
-          <button className="bg-[#1F2937] text-white px-5 py-2.5 rounded-xl hover:bg-[#111827] transition-colors">
+          <Link
+            href="/signup"
+            className="bg-[#1F2937] text-white px-5 py-2.5 rounded-xl hover:bg-[#111827] transition-colors"
+          >
             Join
-          </button>
+          </Link>
         </div>
       </div>
     </header>
