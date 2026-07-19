@@ -13,11 +13,8 @@ export default function Signup() {
 
   const handleFormSubmission = async (formData) => {
     formData.append("role", selectedRole);
-
     await formAction(formData);
   };
-
-  if (!state.success) toast.error(state.message);
 
   return (
     <>
@@ -29,10 +26,16 @@ export default function Signup() {
         />
       )}
       {selectedRole && selectedRole === "freelancer" && (
-        <FreelancerJoin handleFormSubmission={handleFormSubmission} />
+        <FreelancerJoin
+          handleFormSubmission={handleFormSubmission}
+          stateErrors={state.errors}
+        />
       )}
       {selectedRole && selectedRole === "client" && (
-        <ClientJoin handleFormSubmission={handleFormSubmission} />
+        <ClientJoin
+          handleFormSubmission={handleFormSubmission}
+          stateErrors={state.errors}
+        />
       )}
     </>
   );

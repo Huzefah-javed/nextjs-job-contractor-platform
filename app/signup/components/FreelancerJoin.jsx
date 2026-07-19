@@ -1,16 +1,17 @@
 import { userSignupAction } from "@/serverActions/signup";
 import React, { useState } from "react";
 
-export default function FreelancerJoin({handleFormSubmission}) {
-
-  
+export default function FreelancerJoin({ handleFormSubmission, stateErrors }) {
   return (
     <section className="max-w-3xl mx-auto my-12 px-6 py-10 bg-[#FAFAFA] border border-gray-100 rounded-3xl font-sans">
       <h2 className="text-2xl md:text-3xl font-extrabold text-gray-800 text-center tracking-wide uppercase mb-8">
         Join to Access Verified Work
       </h2>
 
-      <form action={handleFormSubmission} className="max-w-2xl mx-auto space-y-5">
+      <form
+        action={handleFormSubmission}
+        className="max-w-2xl mx-auto space-y-5"
+      >
         <div className="">
           <div className="flex flex-col gap-1.5">
             <label className="text-sm font-semibold text-gray-700">Name</label>
@@ -22,6 +23,11 @@ export default function FreelancerJoin({handleFormSubmission}) {
               required
             />
           </div>
+          {stateErrors?.name && (
+            <p className="text-red-500 text-xs font-semibold mt-1.5 pl-1 tracking-wide">
+              {stateErrors.name}
+            </p>
+          )}
         </div>
 
         <div className="flex flex-col gap-1.5">
@@ -33,6 +39,11 @@ export default function FreelancerJoin({handleFormSubmission}) {
             className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 placeholder-gray-300"
             required
           />
+          {stateErrors?.email && (
+            <p className="text-red-500 text-xs font-semibold mt-1.5 pl-1 tracking-wide">
+              {stateErrors.email}
+            </p>
+          )}
         </div>
 
         <div className="flex flex-col gap-1.5">
@@ -46,6 +57,11 @@ export default function FreelancerJoin({handleFormSubmission}) {
             className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 placeholder-gray-300"
             required
           />
+          {stateErrors?.password && (
+            <p className="text-red-500 text-xs font-semibold mt-1.5 pl-1 tracking-wide">
+              {stateErrors.password}
+            </p>
+          )}
         </div>
 
         <div className="flex flex-col gap-1.5">
@@ -59,6 +75,11 @@ export default function FreelancerJoin({handleFormSubmission}) {
             className="w-full px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-green-500 placeholder-gray-300"
             required
           />
+          {stateErrors?.region && (
+            <p className="text-red-500 text-xs font-semibold mt-1.5 pl-1 tracking-wide">
+              {stateErrors.region}
+            </p>
+          )}
         </div>
 
         <div className="space-y-3 pt-3">
@@ -119,4 +140,4 @@ export default function FreelancerJoin({handleFormSubmission}) {
       </form>
     </section>
   );
-};
+}

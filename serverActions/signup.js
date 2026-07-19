@@ -3,6 +3,7 @@
 import { dbConnect } from "@/config/db.config";
 import { users } from "@/schemas/user.schema";
 import { signupSchema } from "@/validations/signup.validation";
+import bcrypt from "bcrypt"; 
 
 export const userSignupAction = async (prevState, formData) => {
   const form = {
@@ -26,7 +27,16 @@ export const userSignupAction = async (prevState, formData) => {
   }
   try {
     await dbConnect();
-    const newUser = await users.create(result.data);
+
+    const hashedPassword = await bcrypt.hash(result.data.password, 10);
+    
+    const userData = {
+      ...result.data,
+      password: hashedPassword,
+    };
+
+    const newUser = await users.create(userData);
+
     return {
       success: true,
       errors: {},

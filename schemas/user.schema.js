@@ -20,7 +20,7 @@ const userSchema = new Schema({
   },
   profileStatus: {
     type: String,
-    default: false,
+    enum: ["pending", "approved", "rejected", "suspended"],
   },
   region: {
     type: String,

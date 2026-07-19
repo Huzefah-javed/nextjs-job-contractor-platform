@@ -3,7 +3,7 @@ import { z } from "zod";
 export const signupSchema = z.object({
   name: z
     .string()
-    .min(2, { message: "Name must be at least 2 characters" })
+    .min(4, { message: "Name must be at least 4 characters" })
     .trim(),
   email: z
     .string()
@@ -15,7 +15,7 @@ export const signupSchema = z.object({
     .min(8, { message: "Password must be at least 8 characters" }),
   region: z
     .string()
-    .min(2, { message: "Region must be at least 2 characters" })
+    .min(4, { message: "Region must be at least 4 characters" })
     .trim(),
-    role: z.enum(["client", "freelancer"])
+  role: z.enum(["client", "freelancer"])
 });

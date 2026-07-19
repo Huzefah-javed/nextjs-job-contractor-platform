@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-export default function JoinRoleSelection({ setSelectedRole }) {
+export default function JoinRoleSelection({ setSelectedRole, stateErrors }) {
   const [role, setRole] = useState(null);
 
   function handleSubmit() {
@@ -114,7 +114,7 @@ export default function JoinRoleSelection({ setSelectedRole }) {
       {/* Redirect Footer */}
       <p className="mt-4 text-xs text-gray-400">
         Already have an account?{" "}
-        <a href="#login" className="green-txt font-semibold hover:underline">
+        <a href="/login" className="green-txt font-semibold hover:underline">
           Login!
         </a>
       </p>
