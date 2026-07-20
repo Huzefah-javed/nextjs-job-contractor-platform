@@ -44,7 +44,7 @@ export default async function middleware(request) {
         expiresIn: "15m",
       });
 
-      res.cookies.set("authCookie", data.token, {
+      res.cookies.set("authCookie", token, {
         httpOnly: true,
         secure: true,
         sameSite: "lax",

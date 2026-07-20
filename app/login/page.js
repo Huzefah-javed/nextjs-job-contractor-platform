@@ -68,7 +68,6 @@ export default function Login() {
           )}
         </div>
 
-        {/* Password Field */}
         <div className="flex flex-col gap-1.5">
           <div className="flex justify-between items-center">
             <label className="text-sm font-semibold text-gray-700">

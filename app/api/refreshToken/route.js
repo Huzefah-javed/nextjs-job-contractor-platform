@@ -8,7 +8,7 @@ export async function POST(request) {
     if (!res) throw new Error("user detail not found");
     return NextResponse.json({ success: true, data: res });
   } catch (error) {
-    console.log(error);
+    console.log(error);    
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
