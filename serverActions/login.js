@@ -14,7 +14,12 @@ export const loginUserAction = async (prevState, formData) => {
   try {
     await dbConnect();
 
-    const user = await users.findOne({ email: email.toLowerCase() });
+    const user = await users.findOne({
+      $or: [
+        { email: email.toLowerCase() },
+        { companyEmail: email.toLowerCase() },
+      ],
+    });
 
     if (!user) {
       return {

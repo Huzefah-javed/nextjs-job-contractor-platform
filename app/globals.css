@@ -1,6 +1,9 @@
 @import "tailwindcss";
 
-
 .green-txt {
   @apply text-[#14A800];
+}
+
+::-webkit-scrollbar {
+  display: none;
 }

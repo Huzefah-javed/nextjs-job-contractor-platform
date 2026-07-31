@@ -4,16 +4,18 @@ import { useActionState, useState } from "react";
 import JoinRoleSelection from "./components/RoleSelector";
 import FreelancerJoin from "./components/FreelancerJoin";
 import ClientJoin from "./components/ClientJoin";
-import { userSignupAction } from "@/serverActions/signup";
-import { toast } from "react-toastify";
+import { clientSignupAction } from "@/serverActions/clientSignup";
+import { contractorSignupAction } from "@/serverActions/contractorSignup";
 
 export default function Signup() {
   const [selectedRole, setSelectedRole] = useState(null);
-  const [state, formAction, isPending] = useActionState(userSignupAction, {});
+  const [state, formAction, isPending] = useActionState(contractorSignupAction, {});
+  const clientAct = useActionState(clientSignupAction, {});
 
   const handleFormSubmission = async (formData) => {
     formData.append("role", selectedRole);
-    await formAction(formData);
+    if (selectedRole === "contractor") await formAction(formData);
+    if (selectedRole === "client") await clientAct[1](formData)
   };
 
   return (
@@ -25,7 +27,7 @@ export default function Signup() {
           selectedRole={selectedRole}
         />
       )}
-      {selectedRole && selectedRole === "freelancer" && (
+      {selectedRole && selectedRole === "contractor" && (
         <FreelancerJoin
           handleFormSubmission={handleFormSubmission}
           stateErrors={state.errors}

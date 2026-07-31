@@ -17,9 +17,9 @@ export default function JoinRoleSelection({ setSelectedRole, stateErrors }) {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full max-w-2xl mb-8">
         <div
-          onClick={() => setRole("freelancer")}
+          onClick={() => setRole("contractor")}
           className={`cursor-pointer p-6 border-2 rounded-2xl bg-white flex flex-col justify-between transition-all duration-200 h-44 relative ${
-            role === "freelancer"
+            role === "contractor"
               ? "border-green-500 shadow-md scale-[1.02]"
               : "border-gray-200 hover:border-gray-300"
           }`}
@@ -41,10 +41,10 @@ export default function JoinRoleSelection({ setSelectedRole, stateErrors }) {
 
             <div
               className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
-                role === "freelancer" ? "border-green-500" : "border-gray-300"
+                role === "contractor" ? "border-green-500" : "border-gray-300"
               }`}
             >
-              {role === "freelancer" && (
+              {role === "contractor" && (
                 <div className="w-2.5 h-2.5 rounded-full bg-green-500" />
               )}
             </div>
@@ -63,9 +63,7 @@ export default function JoinRoleSelection({ setSelectedRole, stateErrors }) {
               : "border-gray-200 hover:border-gray-300"
           }`}
         >
-          {/* Top Row: Icon & Radio Circle */}
           <div className="flex justify-between items-start">
-            {/* Client Icon (SVG) */}
             <svg
               className="w-10 h-10 text-gray-700"
               fill="none"

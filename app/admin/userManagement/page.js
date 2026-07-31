@@ -16,16 +16,18 @@ async function getMetricsData() {
         _id: null,
         total: { $sum: 1 },
         active: {
-          $sum: { $cond: [{ $eq: [{ $toLower: "$status" }, "active"] }, 1, 0] },
+          $sum: {
+            $cond: [{ $eq: [{ $toLower: "$profileStatus" }, "approved"] }, 1, 0],
+          },
         },
         suspended: {
           $sum: {
-            $cond: [{ $eq: [{ $toLower: "$status" }, "suspended"] }, 1, 0],
+            $cond: [{ $eq: [{ $toLower: "$profileStatus" }, "suspend"] }, 1, 0],
           },
         },
         pending: {
           $sum: {
-            $cond: [{ $eq: [{ $toLower: "$status" }, "pending"] }, 1, 0],
+            $cond: [{ $eq: [{ $toLower: "$profileStatus" }, "pending"] }, 1, 0],
           },
         },
       },
@@ -85,7 +87,7 @@ export default async function UserManagementPage() {
         </div>
       </div>
 
-      <UserTable  />
+      <UserTable />
     </div>
   );
 }

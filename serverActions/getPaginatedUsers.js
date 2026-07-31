@@ -30,7 +30,9 @@ export async function getPaginatedUsers({
     const [Users, totalCount] = await Promise.all([
       users
         .find(query)
-        .select("name role region status email profileStatus")
+        .select(
+          "name role region country status email profileStatus specialization docNumber docFrontLink docBackLink companyEmail companyName repRole phone companySize taxId role profileStatus companyRegistrationDoc companyRegistrationDocPbId representativeIdDoc representativeIdDocPbId createdAt"
+        )
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)

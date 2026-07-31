@@ -34,7 +34,6 @@ export default async function middleware(request) {
         return NextResponse.redirect(new URL("/", request.url));
       }
       const data = await response.json();
-
       if (path.slice(1, data.data.role.length + 1) !== data.data.role)
         return NextResponse.redirect(new URL("/", request.url));
 
