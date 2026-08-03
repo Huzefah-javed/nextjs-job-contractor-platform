@@ -160,9 +160,9 @@ export default async function ApprovedJobsPage() {
                   >
                     View Job
                   </Link>
-
+                 
                   <Link
-                    href={`/client/jobs/${job.id}/proposals`}
+                    href={`/client/activeJobs/${job.id}/proposal`}
                     className={`w-full py-2.5 px-3 rounded-xl font-bold text-xs transition-all shadow-sm text-center flex items-center justify-center gap-1.5 ${
                       job.proposalCount > 0
                         ? "bg-[#16A34A] hover:bg-green-700 text-white"

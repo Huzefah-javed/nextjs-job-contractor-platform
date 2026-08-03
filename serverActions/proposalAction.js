@@ -124,32 +124,64 @@ export async function withdrawProposalAction(proposalId) {
 
 export async function updateProposalStatusAction(payload) {
   try {
+    const jobId = payload.jobId || null;
+    const contractorId = payload.contractorId || null;
+
     const validationResult = updateProposalStatusSchema.safeParse(payload);
 
     if (!validationResult.success) {
-      const errorMsg =
-        validationResult.error.errors[0]?.message || "Invalid payload.";
-      return { success: false, message: errorMsg };
-    }
+      const fieldErrors = validationResult.error.flatten().fieldErrors;
 
+      console.log("validation validationResult: ", validationResult);
+
+      return {
+        success: false,
+        errors: fieldErrors,
+        message: "Please correct the errors in the form.",
+      };
+    }
     const { proposalId, status, rejectionReason } = validationResult.data;
 
-    await connectDB();
-
-    const updateFields = { status };
-    if (status === "rejected" && rejectionReason) {
-      updateFields.rejectionReason = rejectionReason;
-    }
+    await dbConnect();
 
     const objectProposalId = new mongoose.Types.ObjectId(proposalId);
+    const objectJobId = new mongoose.Types.ObjectId(jobId);
 
-    const updatedProposal = await Proposal.findByIdAndUpdate(objectProposalId, {
-      updateFields,
-    });
+    await Proposal.updateMany(
+      { jobId: objectJobId },
+      [
+        {
+          $set: {
+            status: {
+              $cond: {
+                if: { $eq: ["$_id", objectProposalId] },
+                then: "accepted",
+                else: "rejected",
+              },
+            },
+          },
+        },
+      ],
+      { strict: false },
+    );
 
-    if (!updatedProposal) {
-      return { success: false, message: "Proposal record not found." };
-    }
+    // const updatedProposal = await Proposal.findByIdAndUpdate(objectProposalId, {
+    //   status,
+    //   rejectionReason,
+    // });
+
+    // if (status === "accepted") {
+    //   await Proposal.updateMany(
+    //     { jobId: objectJobId, _id: { $ne: objectProposalId } },
+    //     { status: "rejected" },
+    //   );
+    // }
+
+    // if (!updatedProposal) {
+    //   return { success: false, message: "Proposal record not found." };
+    // }
+
+    revalidatePath(`/client/activeJobs/${jobId}/proposal`);
 
     return {
       success: true,

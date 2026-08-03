@@ -5,8 +5,9 @@ import { ProjectPost } from "@/schemas/project.schema";
 import { Proposal } from "@/schemas/proposal.schema";
 import { dbConnect } from "@/config/db.config";
 import ProposalListInteractive from "./components/proposalListInteractive";
+import { users } from "@/schemas/user.schema";
 
-export const revalidate = 0;
+export const dynamic = "force-dynamic";
 
 export default async function JobProposalsPage({ params }) {
   const { jobId } = await params;
@@ -26,26 +27,27 @@ export default async function JobProposalsPage({ params }) {
 
   const job = {
     id: rawJob._id.toString(),
-    title: rawJob.title || rawJob.name || "Untitled Job",
-    budget: rawJob.budget || rawJob.proposedBudget || 0,
+    title: rawJob.projectTitle || "Untitled Job",
+    budget: rawJob.budgetRange || 0,
     status: rawJob.status || "approved",
   };
+
 
   const proposals = rawProposals.map((prop) => {
     const contractor = prop.contractorId;
 
     return {
       id: prop._id.toString(),
+      contractorId:contractor._id,
       contractorName:
         contractor?.name || prop.contractorName || "Anonymous Contractor",
       contractorEmail: contractor?.email || prop.contractorEmail || "N/A",
       coverLetter: prop.coverLetter || "",
       proposedBudget: prop.proposedBudget || 0,
       estimatedDuration: prop.estimatedDuration || "N/A",
-      attachments: prop.attachments || [], // Array ({secureUrl, publicId})
-      status: prop.status || "pending", // Schema lowercase: pending, approved, rejected
+      attachments: prop.attachments || [],
+      status: prop.status || "pending",
       rejectionReason: prop.rejectionReason || null,
-      // Format date nicely on the server
       createdAt: prop.createdAt
         ? new Date(prop.createdAt).toLocaleDateString("en-US", {
             month: "short",
@@ -92,7 +94,6 @@ export default async function JobProposalsPage({ params }) {
           </p>
         </div>
 
-        {/* Stat Card */}
         <div className="flex items-center gap-3 flex-shrink-0">
           <div className="bg-gray-50 border border-gray-100 px-5 py-3 rounded-2xl text-right shadow-inner">
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wide">
@@ -108,6 +109,7 @@ export default async function JobProposalsPage({ params }) {
       <ProposalListInteractive
         initialProposals={proposals}
         jobTitle={job.title}
+        jobId={job.id}
       />
     </div>
   );

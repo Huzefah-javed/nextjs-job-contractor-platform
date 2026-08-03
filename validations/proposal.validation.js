@@ -36,9 +36,7 @@ export const updateProposalStatusSchema = z.object({
     .regex(/^[0-9a-fA-F]{24}$/, "Invalid Proposal ID format"),
   status: z.enum(
     ["pending", "shortlisted", "accepted", "rejected", "withdrawn"],
-    {
-      errorMap: () => ({ message: "Invalid status value" }),
-    },
+    { message: "Invalid status value" },
   ),
   rejectionReason: z
     .string()

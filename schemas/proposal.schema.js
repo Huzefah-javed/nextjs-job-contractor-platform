@@ -64,4 +64,3 @@ proposalSchema.index({ jobId: 1, contractorId: 1 }, { unique: true });
 
 export const Proposal =
   mongoose.models.Proposal || mongoose.model("Proposal", proposalSchema);
-

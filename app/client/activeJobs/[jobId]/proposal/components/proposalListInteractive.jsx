@@ -1,12 +1,16 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import ProposalDetailModal from "./ProposalDetailModal";
 
-export default function ProposalListInteractive({ initialProposals }) {
+export default function ProposalListInteractive({ initialProposals, jobId }) {
   const [proposals, setProposals] = useState(initialProposals);
   const [selectedProposal, setSelectedProposal] = useState(null);
 
-  // Sync state when modal approves/rejects
+  useEffect(() => {
+    setProposals(initialProposals);
+  }, [initialProposals]);
+
   const handleProposalStatusUpdated = (updatedId, newStatus, reason) => {
     setProposals((prev) =>
       prev.map((prop) =>
@@ -27,11 +31,9 @@ export default function ProposalListInteractive({ initialProposals }) {
 
   return (
     <div className="space-y-4">
-      {/* Table Container */}
       <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
-            {/* Table Header */}
             <thead>
               <tr className="bg-gray-50/80 border-b border-gray-200 text-[11px] uppercase tracking-wider text-gray-500 font-bold">
                 <th className="py-3.5 px-5">Contractor</th>
@@ -43,7 +45,6 @@ export default function ProposalListInteractive({ initialProposals }) {
               </tr>
             </thead>
 
-            {/* Table Body */}
             <tbody className="divide-y divide-gray-100 text-xs">
               {proposals.map((proposal) => {
                 const isApproved =
@@ -56,7 +57,6 @@ export default function ProposalListInteractive({ initialProposals }) {
                     key={proposal.id}
                     className="hover:bg-gray-50/50 transition-colors"
                   >
-                    {/* Contractor Name & Email */}
                     <td className="py-4 px-5">
                       <div className="font-bold text-gray-900">
                         {proposal.contractorName}
@@ -66,22 +66,18 @@ export default function ProposalListInteractive({ initialProposals }) {
                       </div>
                     </td>
 
-                    {/* Proposed Budget */}
                     <td className="py-4 px-5 font-bold text-gray-800">
                       ${proposal.proposedBudget?.toLocaleString()}
                     </td>
 
-                    {/* Estimated Duration */}
                     <td className="py-4 px-5 text-gray-600 font-medium">
                       {proposal.estimatedDuration}
                     </td>
 
-                    {/* Date */}
                     <td className="py-4 px-5 text-gray-500">
                       {proposal.createdAt}
                     </td>
 
-                    {/* Status Badge */}
                     <td className="py-4 px-5">
                       <span
                         className={`inline-block text-[10px] uppercase font-bold tracking-wider px-2.5 py-0.5 rounded-full border ${
@@ -96,10 +92,8 @@ export default function ProposalListInteractive({ initialProposals }) {
                       </span>
                     </td>
 
-                    {/* Action Buttons */}
                     <td className="py-4 px-5 text-right">
                       <div className="flex items-center justify-end gap-2">
-                        {/* View Button */}
                         <button
                           type="button"
                           onClick={() => setSelectedProposal(proposal)}
@@ -108,7 +102,6 @@ export default function ProposalListInteractive({ initialProposals }) {
                           View
                         </button>
 
-                        {/* Approve Button */}
                         <button
                           type="button"
                           disabled={isApproved}
@@ -120,7 +113,6 @@ export default function ProposalListInteractive({ initialProposals }) {
                           Approve
                         </button>
 
-                        {/* Reject Button */}
                         <button
                           type="button"
                           disabled={isRejected}
@@ -141,13 +133,13 @@ export default function ProposalListInteractive({ initialProposals }) {
         </div>
       </div>
 
-      {/* Detail Modal */}
-      {/* <ProposalDetailModal
+      <ProposalDetailModal
         proposal={selectedProposal}
+        jobId={jobId}
         isOpen={!!selectedProposal}
         onClose={() => setSelectedProposal(null)}
         onStatusUpdated={handleProposalStatusUpdated}
-      /> */}
+      />
     </div>
   );
 }

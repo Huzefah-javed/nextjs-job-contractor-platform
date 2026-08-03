@@ -61,8 +61,18 @@ const projectPostSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["draft", "approved", "reject", "pending", "complete"],
+      enum: ["approved", "reject", "pending"],
       default: "pending",
+    },
+    projectPhase: {
+      type: String,
+      enum: ["acceptingProposals", "inProgress", "completed", "cancelled"],
+      default: "acceptingProposals",
+    },
+    contractorId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
     },
   },
   {

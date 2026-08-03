@@ -49,7 +49,10 @@ export const projectPostSchema = z.object({
     .optional()
     .default({ url: "", publicId: "", fileName: "" }),
 
-  status: z
-    .enum(["draft", "approved", "reject", "pending", "complete"])
-    .default("pending"),
+  status: z.enum(["approved", "reject", "pending"]).default("pending"),
+  projectPhase: z
+    .enum(["acceptingProposals", "inProgress", "completed", "cancelled"], {
+      message: "Invalid project phase value",
+    })
+    .default("acceptingProposals"),
 });
