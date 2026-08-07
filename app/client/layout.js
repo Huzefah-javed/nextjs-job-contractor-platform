@@ -7,7 +7,7 @@ export default function ClientLayout({ children }) {
     <div className="min-h-full flex gap-4 ">
       <ClientSidebar />
       <div className="flex-[80%]">{children}</div>
-      <ClientProfileCard />
+      {/* <ClientProfileCard /> */}
     </div>
   );
 }

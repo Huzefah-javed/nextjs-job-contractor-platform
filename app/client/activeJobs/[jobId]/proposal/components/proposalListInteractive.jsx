@@ -1,24 +1,39 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useTransition, useEffect, useState } from "react";
 import ProposalDetailModal from "./ProposalDetailModal";
+import { updateProposalStatusAction } from "@/serverActions/proposalAction";
+import LoadingSpinner from "@/app/loading";
 
 export default function ProposalListInteractive({ initialProposals, jobId }) {
   const [proposals, setProposals] = useState(initialProposals);
   const [selectedProposal, setSelectedProposal] = useState(null);
+  const [isPending, startTransition] = useTransition();
 
   useEffect(() => {
     setProposals(initialProposals);
   }, [initialProposals]);
 
-  const handleProposalStatusUpdated = (updatedId, newStatus, reason) => {
-    setProposals((prev) =>
-      prev.map((prop) =>
-        prop.id === updatedId
-          ? { ...prop, status: newStatus, rejectionReason: reason || null }
-          : prop,
-      ),
-    );
+  const handleStatusChange = (proposal, newStatus) => {
+    startTransition(async () => {
+      try {
+        const res = await updateProposalStatusAction({
+          proposalId: proposal.id || proposal._id,
+          contractorId: proposal.contractorId,
+          rejectionReason: proposal.rejectionReason || "",
+          status: newStatus,
+          jobId,
+        });
+
+        if (res?.success) {
+          console.log("success");
+        } else {
+          console.log(res);
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    });
   };
 
   if (proposals.length === 0) {
@@ -31,6 +46,7 @@ export default function ProposalListInteractive({ initialProposals, jobId }) {
 
   return (
     <div className="space-y-4">
+      {isPending && <LoadingSpinner />}
       <div className="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
@@ -106,7 +122,7 @@ export default function ProposalListInteractive({ initialProposals, jobId }) {
                           type="button"
                           disabled={isApproved}
                           onClick={() =>
-                            handleProposalStatusUpdated(proposal.id, "approved")
+                            handleStatusChange(proposal, "accepted")
                           }
                           className="px-3 py-1.5 rounded-lg bg-[#16A34A] hover:bg-green-700 disabled:opacity-40 text-white font-bold transition-all text-xs shadow-sm"
                         >
@@ -117,7 +133,7 @@ export default function ProposalListInteractive({ initialProposals, jobId }) {
                           type="button"
                           disabled={isRejected}
                           onClick={() =>
-                            handleProposalStatusUpdated(proposal.id, "rejected")
+                            handleStatusChange(proposal, "rejected")
                           }
                           className="px-3 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 disabled:opacity-40 text-red-600 font-bold transition-all text-xs"
                         >
@@ -138,7 +154,7 @@ export default function ProposalListInteractive({ initialProposals, jobId }) {
         jobId={jobId}
         isOpen={!!selectedProposal}
         onClose={() => setSelectedProposal(null)}
-        onStatusUpdated={handleProposalStatusUpdated}
+        statusUpdated={handleStatusChange}
       />
     </div>
   );

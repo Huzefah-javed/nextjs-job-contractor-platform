@@ -32,13 +32,13 @@ export default async function JobProposalsPage({ params }) {
     status: rawJob.status || "approved",
   };
 
-
   const proposals = rawProposals.map((prop) => {
     const contractor = prop.contractorId;
 
     return {
       id: prop._id.toString(),
-      contractorId:contractor._id,
+      contractorId: contractor._id,
+      jobId: prop.jobId,
       contractorName:
         contractor?.name || prop.contractorName || "Anonymous Contractor",
       contractorEmail: contractor?.email || prop.contractorEmail || "N/A",

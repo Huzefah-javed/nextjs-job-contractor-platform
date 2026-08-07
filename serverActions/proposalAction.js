@@ -3,6 +3,7 @@
 import { dbConnect } from "@/config/db.config";
 import { authAndGetUser } from "@/helpers/authAndGetUser";
 import { uploadToCloud } from "@/helpers/cloud.upload";
+import { ProjectPost } from "@/schemas/project.schema";
 import { Proposal } from "@/schemas/proposal.schema";
 import {
   createProposalSchema,
@@ -147,45 +148,40 @@ export async function updateProposalStatusAction(payload) {
     const objectProposalId = new mongoose.Types.ObjectId(proposalId);
     const objectJobId = new mongoose.Types.ObjectId(jobId);
 
-    await Proposal.updateMany(
-      { jobId: objectJobId },
-      [
-        {
-          $set: {
-            status: {
-              $cond: {
-                if: { $eq: ["$_id", objectProposalId] },
-                then: "accepted",
-                else: "rejected",
+    if (status === "accepted") {
+      await Proposal.updateMany(
+        { jobId: objectJobId },
+        [
+          {
+            $set: {
+              status: {
+                $cond: {
+                  if: { $eq: ["$_id", objectProposalId] },
+                  then: "accepted",
+                  else: "rejected",
+                },
               },
             },
           },
-        },
-      ],
-      { strict: false },
-    );
+        ],
+        { updatePipeline: true },
+      );
 
-    // const updatedProposal = await Proposal.findByIdAndUpdate(objectProposalId, {
-    //   status,
-    //   rejectionReason,
-    // });
-
-    // if (status === "accepted") {
-    //   await Proposal.updateMany(
-    //     { jobId: objectJobId, _id: { $ne: objectProposalId } },
-    //     { status: "rejected" },
-    //   );
-    // }
-
-    // if (!updatedProposal) {
-    //   return { success: false, message: "Proposal record not found." };
-    // }
+      await ProjectPost.findByIdAndUpdate(objectJobId, {
+        contractorId,
+        projectPhase: "inProgress",
+      });
+    } else {
+      await Proposal.findByIdAndUpdate(objectProposalId, {
+        status,
+        rejectionReason,
+      });
+    }
 
     revalidatePath(`/client/activeJobs/${jobId}/proposal`);
 
     return {
       success: true,
-      message: `Proposal status changed to ${status}.`,
     };
   } catch (error) {
     console.error("Error updating proposal status:", error);

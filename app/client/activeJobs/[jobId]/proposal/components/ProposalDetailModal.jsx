@@ -1,61 +1,38 @@
 "use client";
 
-import { updateProposalStatusAction } from "@/serverActions/proposalAction";
-import { useRouter } from "next/navigation";
-import React, { useState, useTransition } from "react";
+import { chatRoomCreationAction } from "@/serverActions/chatRoomAction";
+import React, { useState } from "react";
 
 export default function ProposalDetailModal({
   proposal,
   isOpen,
   onClose,
-  onStatusUpdated,
-  jobId,
+  statusUpdated,
 }) {
-  const [isPending, startTransition] = useTransition();
-  const [showRejectInput, setShowRejectInput] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
-  const [errorMsg, setErrorMsg] = useState("");
+  const [showRejectInput, setShowRejectInput] = useState(false);
 
   if (!isOpen || !proposal) return null;
 
   const isApproved = proposal.status?.toLowerCase() === "approved";
   const isRejected = proposal.status?.toLowerCase() === "rejected";
 
-  const handleStatusChange = (newStatus) => {
-    setErrorMsg("");
+  const handleStatusChange = async (newStatus) => {
+    await statusUpdated({ ...proposal, rejectionReason }, newStatus);
+    onClose();
+  };
 
-    startTransition(async () => {
-      try {
-        const res = await updateProposalStatusAction({
-          proposalId: proposal.id || proposal._id,
-          contractorId:proposal.contractorId,
-          status: newStatus,
-          rejectionReason: rejectionReason,
-          jobId,
-        });
+  const handleChat = async () => {
+    const obj = {
+      jobId: proposal.jobId,
+      contractorId: proposal.contractorId,
+    };
 
-        if (res?.success) {
-          if (onStatusUpdated) {
-            onStatusUpdated(
-              proposal.id || proposal._id,
-              newStatus,
-              newStatus === "rejected" ? rejectionReason : null,
-            );
-          }
-          setShowRejectInput(false);
-          setRejectionReason("");
-          onClose();
-        } else {
-          setErrorMsg(res?.message || "Failed to update proposal status.");
-        }
-      } catch (err) {
-        setErrorMsg("An unexpected error occurred while updating status.");
-      }
-    });
+    await chatRoomCreationAction(obj);
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 overflow-y-auto font-sans">
+    <div className="fixed inset-0 z-30 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 overflow-y-auto font-sans">
       <div className="bg-white w-full rounded-2xl shadow-xl border border-slate-200 overflow-hidden relative max-h-[92vh] flex flex-col my-auto text-slate-800">
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-slate-50/50">
           <div>
@@ -104,12 +81,6 @@ export default function ProposalDetailModal({
         </div>
 
         <div className="p-6 space-y-6 overflow-y-auto">
-          {errorMsg && (
-            <div className="p-3 bg-rose-50 border border-rose-200 rounded-lg text-rose-700 text-xs font-medium">
-              {errorMsg}
-            </div>
-          )}
-
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 rounded-xl border border-slate-200 bg-slate-50/30">
             <div>
               <span className="text-[11px] font-semibold text-slate-400 uppercase">
@@ -273,19 +244,41 @@ export default function ProposalDetailModal({
             <div className="flex items-center gap-2">
               <button
                 type="button"
-                disabled={isPending || isRejected}
+                onClick={handleChat}
+                className="px-4 py-2 rounded-lg text-xs font-bold bg-slate-900 hover:bg-slate-800 text-white transition-all shadow-sm flex items-center gap-1.5"
+              >
+                <svg
+                  className="w-3.5 h-3.5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                  />
+                </svg>
+                <span>Chat with Contractor</span>
+              </button>
+
+              <button
+                type="button"
+                disabled={isRejected}
                 onClick={() => setShowRejectInput(true)}
                 className="px-4 py-2 rounded-lg text-xs font-bold border border-slate-300 text-slate-700 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 disabled:opacity-40 transition-all"
               >
                 Reject Proposal
               </button>
+
               <button
                 type="button"
-                disabled={isPending || isApproved}
+                disabled={isApproved}
                 onClick={() => handleStatusChange("accepted")}
                 className="px-4 py-2 rounded-lg text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white disabled:opacity-40 transition-all shadow-sm"
               >
-                {isPending ? "Updating..." : "Approve Proposal"}
+                Approve Proposal
               </button>
             </div>
           )}
