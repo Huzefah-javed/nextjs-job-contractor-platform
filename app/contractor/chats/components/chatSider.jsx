@@ -11,11 +11,11 @@ export default function ChatSidebar({ conversations, activeId, onSelect }) {
 
       <div className="space-y-2.5 overflow-y-auto max-h-[600px] pr-1">
         {conversations.map((item) => {
-          const isActive = item.chatId === activeId;
+          const isActive = item.ChatId === activeId;
 
           return (
             <button
-              key={item.chatId}
+              key={item.id}
               onClick={() => onSelect(item)}
               className={`w-full text-left p-3 rounded-2xl border transition-all flex items-center gap-3 ${
                 isActive
@@ -24,15 +24,16 @@ export default function ChatSidebar({ conversations, activeId, onSelect }) {
               }`}
             >
               <div className="relative w-10 h-10 font-bold text-2xl flex justify-center items-center rounded-full overflow-hidden bg-slate-100 border border-slate-200">
-                {item.contractorName?.slice(0, 1)}
+                {item?.clientName?.slice(0, 1)}
               </div>
 
               <div className="min-w-0 flex-1">
                 <h3 className="text-xs font-bold text-slate-800 truncate leading-tight">
-                  {item?.contractorName}
+                  {item.clientName}
                 </h3>
                 <p className="text-[11px] text-slate-500 truncate mt-0.5 leading-tight">
-                  {item?.lastMessage || "start conversation"}
+                  {item?.lastMessage.slice(0, 15) + "..." ||
+                    "start conversation"}
                 </p>
               </div>
             </button>

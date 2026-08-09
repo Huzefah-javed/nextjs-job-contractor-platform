@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import ChatWindow from "./components/chatWindow";
 import ChatSidebar from "./components/chatSider";
-import { gettingChatsForClients } from "@/serverActions/clientSideChatActions";
+import { gettingChatsForContractors } from "@/serverActions/contractorSideChatActions";
 
 export default function MessagesPage() {
   const [conversations, setConversations] = useState([]);
@@ -11,21 +11,22 @@ export default function MessagesPage() {
 
   useEffect(() => {
     async function fetchData() {
-      const result = await gettingChatsForClients();
+      const result = await gettingChatsForContractors();
       if (result.success) {
         const convos = result.response.map((convo) => {
           return {
-            chatId: convo.chatId,
+            chatId: convo._id,
             roomId: convo.roomId,
-            clientId: convo.clientId,
-            contractorId: convo.contractor._id,
-            contractorName: convo.contractor.name,
-            lastMessage: convo.lastMessage,
+            contractorId: convo.contractorId,
+            clientName: convo.client.name,
+            clientId: convo.client.id,
+            lastMessage: convo.lastMessage || "start conversation",
           };
         });
 
         setConversations(convos);
       }
+      console.log(result.response);
     }
     fetchData();
   }, []);

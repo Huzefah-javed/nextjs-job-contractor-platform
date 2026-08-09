@@ -3,18 +3,19 @@
 import { dbConnect } from "@/config/db.config";
 import { authAndGetUser } from "@/helpers/authAndGetUser";
 import ChatRoom from "@/schemas/chatRoom.schema";
-import { users } from "@/schemas/user.schema";
 import mongoose from "mongoose";
 
-export const gettingChatsForClients = async () => {
+export const gettingChatsForContractors = async () => {
   const res = await authAndGetUser();
   if (!res.success) return { success: false };
-  const clientId = new mongoose.Types.ObjectId(res.id);
+  const contractorId = res.id;
+
+  const objId = new mongoose.Types.ObjectId(contractorId);
 
   try {
     await dbConnect();
     const response = await ChatRoom.aggregate([
-      { $match: { clientId } },
+      { $match: { contractorId: objId } },
       {
         $lookup: {
           from: "messages",
@@ -24,29 +25,26 @@ export const gettingChatsForClients = async () => {
           pipeline: [{ $sort: { createdAt: -1 } }, { $limit: 1 }],
         },
       },
-      {
-        $unwind: {
-          path: "$chats",
-          preserveNullAndEmptyArrays: true,
-        },
-      },
+      { $unwind: "$chats" },
       {
         $lookup: {
           from: "users",
-          localField: "contractorId",
+          localField: "clientId",
           foreignField: "_id",
-          as: "contractor",
-          pipeline: [{ $project: { _id: 1, name: 1 } }],
+          as: "client",
         },
       },
-      { $unwind: "$contractor" },
-
+      { $unwind: "$client" },
       {
         $project: {
-          contractor: 1,
-          clientId: 1,
           roomId: 1,
-          chatId: "$_id",
+          _id: 1,
+          contractorId: 1,
+          client: {
+            id: "$client._id",
+            name: "$client.name",
+            email: "$client.email",
+          },
           lastMessage: "$chats.message",
         },
       },

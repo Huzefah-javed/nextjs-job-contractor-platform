@@ -6,26 +6,27 @@ import {
   MessageLoadAction,
 } from "@/serverActions/messagesAction";
 import React, { useEffect, useState } from "react";
+import { io } from "socket.io-client";
 
 export default function ChatWindow({ active }) {
   const [inputText, setInputText] = useState("");
   const [messages, setMessages] = useState([]);
 
-
   useEffect(() => {
     socket.on("receiveMsg", (data) => {
       setMessages((prev) => [...prev, data]);
     });
+    console.log(messages);
   }, []);
 
   useEffect(() => {
     socket.on("connect", () => {
       console.log(`Connected to server with ID: ${socket.id}`);
     });
+
     console.log("chitty", active.roomId);
     socket.emit("chat", active.roomId);
   }, [active?.roomId]);
-
   useEffect(() => {
     async function fetchMsgs() {
       const res = await MessageLoadAction(active.chatId);
@@ -39,18 +40,29 @@ export default function ChatWindow({ active }) {
   const handleSend = async (e) => {
     e.preventDefault();
     if (!inputText.trim()) return;
+    const newMessage = {
+      id: Date.now().toString(),
+      sender: "me",
+      text: inputText,
+      timestamp: new Date().toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+    };
 
     socket.emit("sendMsg", {
       roomId: active.roomId,
       message: inputText,
-      senderId: active.clientId,
+      senderId: active.contractorId,
     });
     await MessageAction(active?.chatId, inputText);
+
     setInputText("");
+
+    console.log(messages);
   };
 
   if (!active) return null;
-  console.log(messages);
   return (
     <div className="flex-2 border border-slate-200/80 rounded-[2rem] bg-white p-6 shadow-sm flex flex-col justify-between ">
       <div className="flex items-center gap-3 pb-4 border-b border-slate-100">
@@ -72,7 +84,7 @@ export default function ChatWindow({ active }) {
           messages?.map((msg) => {
             console.log(" senderId ", msg.senderId);
             console.log(" clientId ", active.clientId);
-            const isMe = msg.senderId === active.clientId;
+            const isMe = msg.senderId === active.contractorId;
 
             return (
               <div
