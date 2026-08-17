@@ -32,7 +32,8 @@ export default function ChatSidebar({ conversations, activeId, onSelect }) {
                   {item?.contractorName}
                 </h3>
                 <p className="text-[11px] text-slate-500 truncate mt-0.5 leading-tight">
-                  {item?.lastMessage || "start conversation"}
+                  {item?.lastMessage.slice(0, 15) + "..." ||
+                    "start conversation"}
                 </p>
               </div>
             </button>

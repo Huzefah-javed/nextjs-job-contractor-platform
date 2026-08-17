@@ -69,10 +69,26 @@ const projectPostSchema = new mongoose.Schema(
       enum: ["acceptingProposals", "inProgress", "completed", "cancelled"],
       default: "acceptingProposals",
     },
-    contractorId: {
+    selectedProposalId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "Proposal",
       default: null,
+    },
+    transactionId: {
+      type: String,
+      default: null,
+    },
+    escrowStatus: {
+      type: String,
+      enum: [
+        "not_initiated",
+        "pending",
+        "funded",
+        "released",
+        "refunded",
+        "cancelled",
+      ],
+      default: "not_initiated",
     },
   },
   {

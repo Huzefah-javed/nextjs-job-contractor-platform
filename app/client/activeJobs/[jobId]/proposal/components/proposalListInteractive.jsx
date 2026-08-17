@@ -4,6 +4,7 @@ import React, { useTransition, useEffect, useState } from "react";
 import ProposalDetailModal from "./ProposalDetailModal";
 import { updateProposalStatusAction } from "@/serverActions/proposalAction";
 import LoadingSpinner from "@/app/loading";
+import { useRouter } from "next/navigation";
 
 export default function ProposalListInteractive({ initialProposals, jobId }) {
   const [proposals, setProposals] = useState(initialProposals);
@@ -13,6 +14,8 @@ export default function ProposalListInteractive({ initialProposals, jobId }) {
   useEffect(() => {
     setProposals(initialProposals);
   }, [initialProposals]);
+
+  const router = useRouter();
 
   const handleStatusChange = (proposal, newStatus) => {
     startTransition(async () => {
@@ -26,7 +29,8 @@ export default function ProposalListInteractive({ initialProposals, jobId }) {
         });
 
         if (res?.success) {
-          console.log("success");
+          console.log("success", res);
+          if (res.paymentUrl) router.push(res.paymentUrl);
         } else {
           console.log(res);
         }
@@ -116,28 +120,6 @@ export default function ProposalListInteractive({ initialProposals, jobId }) {
                           className="px-3 py-1.5 rounded-lg border border-gray-200 text-gray-700 font-semibold hover:bg-gray-100 transition-all text-xs"
                         >
                           View
-                        </button>
-
-                        <button
-                          type="button"
-                          disabled={isApproved}
-                          onClick={() =>
-                            handleStatusChange(proposal, "accepted")
-                          }
-                          className="px-3 py-1.5 rounded-lg bg-[#16A34A] hover:bg-green-700 disabled:opacity-40 text-white font-bold transition-all text-xs shadow-sm"
-                        >
-                          Approve
-                        </button>
-
-                        <button
-                          type="button"
-                          disabled={isRejected}
-                          onClick={() =>
-                            handleStatusChange(proposal, "rejected")
-                          }
-                          className="px-3 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 disabled:opacity-40 text-red-600 font-bold transition-all text-xs"
-                        >
-                          Reject
                         </button>
                       </div>
                     </td>

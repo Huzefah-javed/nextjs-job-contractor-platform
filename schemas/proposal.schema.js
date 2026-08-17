@@ -54,6 +54,10 @@ const proposalSchema = new mongoose.Schema(
       trim: true,
       default: null,
     },
+    nextUrl: {
+      type: String,
+      default: null,
+    },
   },
   {
     timestamps: true,
@@ -63,4 +67,4 @@ const proposalSchema = new mongoose.Schema(
 proposalSchema.index({ jobId: 1, contractorId: 1 }, { unique: true });
 
 export const Proposal =
-  mongoose.models.Proposal || mongoose.model("Proposal", proposalSchema);
+mongoose.models.Proposal || mongoose.model("Proposal", proposalSchema);

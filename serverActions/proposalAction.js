@@ -3,6 +3,10 @@
 import { dbConnect } from "@/config/db.config";
 import { authAndGetUser } from "@/helpers/authAndGetUser";
 import { uploadToCloud } from "@/helpers/cloud.upload";
+import {
+  createTransaction,
+  getClientEscrowPaymentLink,
+} from "@/helpers/escrowApisFunc";
 import { ProjectPost } from "@/schemas/project.schema";
 import { Proposal } from "@/schemas/proposal.schema";
 import {
@@ -148,29 +152,49 @@ export async function updateProposalStatusAction(payload) {
     const objectProposalId = new mongoose.Types.ObjectId(proposalId);
     const objectJobId = new mongoose.Types.ObjectId(jobId);
 
-    if (status === "accepted") {
-      await Proposal.updateMany(
-        { jobId: objectJobId },
-        [
-          {
-            $set: {
-              status: {
-                $cond: {
-                  if: { $eq: ["$_id", objectProposalId] },
-                  then: "accepted",
-                  else: "rejected",
-                },
-              },
-            },
-          },
-        ],
-        { updatePipeline: true },
-      );
+    let paymentUrl = null;
 
-      await ProjectPost.findByIdAndUpdate(objectJobId, {
-        contractorId,
-        projectPhase: "inProgress",
-      });
+    if (status === "accepted") {
+      const { transactionId, nextUrl } = await createTransaction({});
+
+      // await Proposal.updateMany(
+      //   { jobId: objectJobId },
+      //   [
+      //     {
+      //       $set: {
+      //         status: {
+      //           $cond: {
+      //             if: { $eq: ["$_id", objectProposalId] },
+      //             then: "accepted",
+      //             else: "rejected",
+      //           },
+      //         },
+      //         nextUrl: {
+      //           $cond: {
+      //             if: { $eq: ["$_id", objectProposalId] },
+      //             then: nextUrl,
+      //             else: null,
+      //           },
+      //         },
+      //       },
+      //     },
+      //   ],
+      //   { updatePipeline: true },
+      // );
+
+      // await ProjectPost.findByIdAndUpdate(objectJobId, {
+      //   projectPhase: "inProgress",
+      // })
+      await Promise.all([
+        Proposal.updateMany({ jobId: objectJobId }, { nextUrl }),
+        ProjectPost.findByIdAndUpdate(objectJobId, {
+          selectedProposalId: objectProposalId,
+          transactionId,
+          escrowStatus: "pending",
+        }),
+      ]);
+
+      paymentUrl = `https://www.escrow-sandbox.com/transactions/${transactionId}/payment`;
     } else {
       await Proposal.findByIdAndUpdate(objectProposalId, {
         status,
@@ -179,10 +203,11 @@ export async function updateProposalStatusAction(payload) {
     }
 
     revalidatePath(`/client/activeJobs/${jobId}/proposal`);
-
-    return {
+    const obj = {
       success: true,
     };
+    if (paymentUrl) obj.paymentUrl = paymentUrl;
+    return obj;
   } catch (error) {
     console.error("Error updating proposal status:", error);
     return { success: false, message: "Failed to update status." };

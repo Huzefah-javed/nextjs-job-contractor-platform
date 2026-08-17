@@ -50,7 +50,6 @@ export default function ChatWindow({ active }) {
   };
 
   if (!active) return null;
-  console.log(messages);
   return (
     <div className="flex-2 border border-slate-200/80 rounded-[2rem] bg-white p-6 shadow-sm flex flex-col justify-between ">
       <div className="flex items-center gap-3 pb-4 border-b border-slate-100">
@@ -59,7 +58,7 @@ export default function ChatWindow({ active }) {
         </div>
         <div>
           <h2 className="text-sm font-bold text-slate-800 leading-tight">
-            {active?.userName}
+            {active?.contractorName}
           </h2>
           <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
             {active?.status || "ONLINE"}
@@ -70,8 +69,6 @@ export default function ChatWindow({ active }) {
       <div className="flex-1 py-6 overflow-y-auto space-y-5">
         {messages &&
           messages?.map((msg) => {
-            console.log(" senderId ", msg.senderId);
-            console.log(" clientId ", active.clientId);
             const isMe = msg.senderId === active.clientId;
 
             return (

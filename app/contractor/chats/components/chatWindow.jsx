@@ -71,7 +71,7 @@ export default function ChatWindow({ active }) {
         </div>
         <div>
           <h2 className="text-sm font-bold text-slate-800 leading-tight">
-            {active?.userName}
+            {active?.clientName}
           </h2>
           <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
             {active?.status || "ONLINE"}
@@ -82,8 +82,6 @@ export default function ChatWindow({ active }) {
       <div className="flex-1 py-6 overflow-y-auto space-y-5">
         {messages &&
           messages?.map((msg) => {
-            console.log(" senderId ", msg.senderId);
-            console.log(" clientId ", active.clientId);
             const isMe = msg.senderId === active.contractorId;
 
             return (
