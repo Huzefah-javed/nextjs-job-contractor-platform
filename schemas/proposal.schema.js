@@ -4,7 +4,7 @@ const proposalSchema = new mongoose.Schema(
   {
     jobId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Project",
+      ref: "ProjectPost",
       required: [true, "Job reference is required"],
       index: true,
     },
@@ -43,7 +43,13 @@ const proposalSchema = new mongoose.Schema(
     status: {
       type: String,
       enum: {
-        values: ["pending", "shortlisted", "accepted", "rejected", "withdrawn"],
+        values: [
+          "pending",
+          "termsPending",
+          "accepted",
+          "rejected",
+          "withdrawn",
+        ],
         message: "Invalid proposal status: {VALUE}",
       },
       default: "pending",
@@ -67,4 +73,4 @@ const proposalSchema = new mongoose.Schema(
 proposalSchema.index({ jobId: 1, contractorId: 1 }, { unique: true });
 
 export const Proposal =
-mongoose.models.Proposal || mongoose.model("Proposal", proposalSchema);
+  mongoose.models.Proposal || mongoose.model("Proposal", proposalSchema);

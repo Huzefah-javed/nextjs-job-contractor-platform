@@ -19,7 +19,7 @@ export async function approveProjectAction(projectId) {
     }
 
     const targetObjectId = new mongoose.Types.ObjectId(projectId);
-
+    
     await dbConnect();
 
     const updatedProject = await ProjectPost.findByIdAndUpdate(targetObjectId, {

@@ -186,7 +186,10 @@ export async function updateProposalStatusAction(payload) {
       //   projectPhase: "inProgress",
       // })
       await Promise.all([
-        Proposal.updateMany({ jobId: objectJobId }, { nextUrl }),
+        Proposal.updateMany(
+          { jobId: objectJobId },
+          { nextUrl, status: "termsPending" },
+        ),
         ProjectPost.findByIdAndUpdate(objectJobId, {
           selectedProposalId: objectProposalId,
           transactionId,
