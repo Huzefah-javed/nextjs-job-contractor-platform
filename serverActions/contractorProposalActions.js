@@ -14,7 +14,7 @@ export async function getPendingTermsProposals() {
     await dbConnect();
     const proposals = await Proposal.find({
       contractorId: contractorId,
-      status: "termsPending",
+      escrowStatus: "termsPending",
     })
       .populate({
         path: "jobId",
