@@ -66,7 +66,13 @@ const projectPostSchema = new mongoose.Schema(
     },
     projectPhase: {
       type: String,
-      enum: ["acceptingProposals", "inProgress", "completed", "cancelled"],
+      enum: [
+        "acceptingProposals",
+        "inProgress",
+        "active",
+        "completed",
+        "cancelled",
+      ],
       default: "acceptingProposals",
     },
     selectedProposalId: {
@@ -83,7 +89,8 @@ const projectPostSchema = new mongoose.Schema(
       enum: [
         "not_initiated",
         "pending",
-        "funded",
+        "payment_sent",
+        "payment_approved",
         "released",
         "refunded",
         "cancelled",

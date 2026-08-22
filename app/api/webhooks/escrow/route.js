@@ -11,11 +11,24 @@ export async function POST(req) {
 
     const { event, transaction_id } = body;
 
-    switch (action) {
+    switch (event) {
       case "agree":
-        await Proposal.updateOne({ transactionId: transaction_id }, {status:"accepted"});
+        await Proposal.updateOne(
+          { transactionId: transaction_id },
+          { status: "accepted" },
+        );
+          await ProjectPost.updateOne(
+          { transactionId: transaction_id },
+          { escrowStatus: "payment_sent" },
+        );
         break;
-      case "funded":
+      case "payment_sent":
+        await ProjectPost.updateOne(
+          { transactionId: transaction_id },
+          { escrowStatus: "payment_sent" },
+        );
+        break;
+      case "payment_approved":
         await Proposal.updateMany(
           { jobId: objectJobId },
           [
@@ -28,25 +41,14 @@ export async function POST(req) {
                     else: "rejected",
                   },
                 },
-                nextUrl: {
-                  $cond: {
-                    if: { $eq: ["$_id", objectProposalId] },
-                    then: nextUrl,
-                    else: null,
-                  },
-                },
               },
             },
           ],
           { updatePipeline: true },
         );
-
-        await ProjectPost.findByIdAndUpdate(objectJobId, {
-          projectPhase: "inProgress",
-        });
-        await ProjectPost.findOneAndUpdate(
+        await ProjectPost.updateOne(
           { transactionId: transaction_id },
-          { escrowStatus: "funded", status: "active" },
+          { projectPhase: "inProgress", escrowStatus: "payment_approved" },
         );
         break;
 

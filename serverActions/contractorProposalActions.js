@@ -15,6 +15,7 @@ export async function getPendingTermsProposals() {
     const proposals = await Proposal.find({
       contractorId: contractorId,
       escrowStatus: "termsPending",
+      status:"accepted"
     })
       .populate({
         path: "jobId",

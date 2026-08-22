@@ -188,11 +188,17 @@ export async function updateProposalStatusAction(payload) {
       await Promise.all([
         Proposal.updateMany(
           { jobId: objectJobId },
-          { nextUrl, escrowStatus: "termsPending", transactionId },
+          {
+            nextUrl,
+            escrowStatus: "termsPending",
+            transactionId,
+            status: "accepted",
+          },
         ),
         ProjectPost.findByIdAndUpdate(objectJobId, {
           selectedProposalId: objectProposalId,
           transactionId,
+          projectPhase: "inProgress",
           escrowStatus: "pending",
         }),
       ]);
