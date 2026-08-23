@@ -1,5 +1,6 @@
 import { dbConnect } from "@/config/db.config";
 import { ProjectPost } from "@/schemas/project.schema";
+import { Proposal } from "@/schemas/proposal.schema";
 import { NextResponse } from "next/server";
 
 export async function POST(req) {
@@ -17,7 +18,7 @@ export async function POST(req) {
           { transactionId: transaction_id },
           { status: "accepted" },
         );
-          await ProjectPost.updateOne(
+        await ProjectPost.updateOne(
           { transactionId: transaction_id },
           { escrowStatus: "payment_sent" },
         );
