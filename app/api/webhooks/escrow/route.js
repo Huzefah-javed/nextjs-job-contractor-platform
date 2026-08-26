@@ -16,7 +16,7 @@ export async function POST(req) {
       case "agree":
         await Proposal.updateOne(
           { transactionId: transaction_id },
-          { status: "accepted" },
+          { status: "accepted", escrowStatus: "accepted" },
         );
         await ProjectPost.updateOne(
           { transactionId: transaction_id },

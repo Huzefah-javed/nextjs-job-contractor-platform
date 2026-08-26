@@ -6,27 +6,10 @@ import {
   MessageLoadAction,
 } from "@/serverActions/messagesAction";
 import React, { useEffect, useState } from "react";
-import { io } from "socket.io-client";
 
-export default function ChatWindow({ active }) {
+export default function ChatWindow({ active, setMessages, messages }) {
   const [inputText, setInputText] = useState("");
-  const [messages, setMessages] = useState([]);
 
-  useEffect(() => {
-    socket.on("receiveMsg", (data) => {
-      setMessages((prev) => [...prev, data]);
-    });
-    console.log(messages);
-  }, []);
-
-  useEffect(() => {
-    socket.on("connect", () => {
-      console.log(`Connected to server with ID: ${socket.id}`);
-    });
-
-    console.log("chitty", active.roomId);
-    socket.emit("chat", active.roomId);
-  }, [active?.roomId]);
   useEffect(() => {
     async function fetchMsgs() {
       const res = await MessageLoadAction(active.chatId);
@@ -35,31 +18,27 @@ export default function ChatWindow({ active }) {
     fetchMsgs();
   }, [active]);
 
-  console.log(active);
+  console.log(messages);
 
   const handleSend = async (e) => {
     e.preventDefault();
     if (!inputText.trim()) return;
-    const newMessage = {
-      id: Date.now().toString(),
-      sender: "me",
-      text: inputText,
-      timestamp: new Date().toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-    };
-
     socket.emit("sendMsg", {
-      roomId: active.roomId,
+      roomId: active.roomId || "mf34f",
       message: inputText,
-      senderId: active.contractorId,
+      senderId: active.contractorId || "mf34f",
     });
-    await MessageAction(active?.chatId, inputText);
+    // setMessages((prev) => [
+    //   ...prev,
+    //   {
+    //     roomId: active.roomId,
+    //     message: inputText,
+    //     senderId: active.contractorId,
+    //   },
+    // ]);
+    // await MessageAction(active?.chatId, inputText);
 
     setInputText("");
-
-    console.log(messages);
   };
 
   if (!active) return null;

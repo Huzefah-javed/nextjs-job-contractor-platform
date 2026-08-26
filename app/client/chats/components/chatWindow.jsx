@@ -7,24 +7,8 @@ import {
 } from "@/serverActions/messagesAction";
 import React, { useEffect, useState } from "react";
 
-export default function ChatWindow({ active }) {
+export default function ChatWindow({ active, setMessages, messages }) {
   const [inputText, setInputText] = useState("");
-  const [messages, setMessages] = useState([]);
-
-
-  useEffect(() => {
-    socket.on("receiveMsg", (data) => {
-      setMessages((prev) => [...prev, data]);
-    });
-  }, []);
-
-  useEffect(() => {
-    socket.on("connect", () => {
-      console.log(`Connected to server with ID: ${socket.id}`);
-    });
-    console.log("chitty", active.roomId);
-    socket.emit("chat", active.roomId);
-  }, [active?.roomId]);
 
   useEffect(() => {
     async function fetchMsgs() {
@@ -34,18 +18,25 @@ export default function ChatWindow({ active }) {
     fetchMsgs();
   }, [active]);
 
-  console.log(active);
+  console.log(messages);
 
   const handleSend = async (e) => {
     e.preventDefault();
     if (!inputText.trim()) return;
-
     socket.emit("sendMsg", {
       roomId: active.roomId,
       message: inputText,
       senderId: active.clientId,
     });
-    await MessageAction(active?.chatId, inputText);
+    // setMessages((prev) => [
+    //   ...prev,
+    //   { 
+    //     roomId: active.roomId,
+    //     message: inputText,
+    //     senderId: active.clientId
+    //    },
+    // ]);
+    // await MessageAction(active?.chatId, inputText);
     setInputText("");
   };
 

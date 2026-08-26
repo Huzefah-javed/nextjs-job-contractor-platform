@@ -22,10 +22,22 @@ export const gettingChatsForContractors = async () => {
           localField: "_id",
           foreignField: "chatId",
           as: "chats",
-          pipeline: [{ $sort: { createdAt: -1 } }, { $limit: 1 }],
+          pipeline: [
+            {
+              $facet: {
+                unreadMsgCount: [
+                  { $match: { read: false, senderId: { $ne: objId } } },
+                  { $count: "count" },
+                ],
+                lastMsg: [{ $sort: { createdAt: -1 } }, { $limit: 1 }],
+              },
+            },
+          ],
         },
       },
       { $unwind: "$chats" },
+      { $unwind: "$chats.lastMsg" },
+      { $unwind: "$chats.unreadMsgCount" },
       {
         $lookup: {
           from: "users",
@@ -45,7 +57,8 @@ export const gettingChatsForContractors = async () => {
             name: "$client.name",
             email: "$client.email",
           },
-          lastMessage: "$chats.message",
+          lastMessage: "$chats.lastMsg.message",
+          unreadMsgCount: "$chats.unreadMsgCount.count",
         },
       },
     ]);

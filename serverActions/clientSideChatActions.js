@@ -3,6 +3,7 @@
 import { dbConnect } from "@/config/db.config";
 import { authAndGetUser } from "@/helpers/authAndGetUser";
 import ChatRoom from "@/schemas/chatRoom.schema";
+import Message from "@/schemas/message.schema";
 import { users } from "@/schemas/user.schema";
 import mongoose from "mongoose";
 
@@ -21,7 +22,17 @@ export const gettingChatsForClients = async () => {
           localField: "_id",
           foreignField: "chatId",
           as: "chats",
-          pipeline: [{ $sort: { createdAt: -1 } }, { $limit: 1 }],
+          pipeline: [
+            {
+              $facet: {
+                unreadMsgCount: [
+                  { $match: { read: false, senderId: { $ne: clientId } } },
+                  { $count: "count" },
+                ],
+                lastMsg: [{ $sort: { createdAt: -1 } }, { $limit: 1 }],
+              },
+            },
+          ],
         },
       },
       {
@@ -30,6 +41,8 @@ export const gettingChatsForClients = async () => {
           preserveNullAndEmptyArrays: true,
         },
       },
+      { $unwind: "$chats.lastMsg" },
+      { $unwind: "$chats.unreadMsgCount" },
       {
         $lookup: {
           from: "users",
@@ -40,17 +53,18 @@ export const gettingChatsForClients = async () => {
         },
       },
       { $unwind: "$contractor" },
-
       {
         $project: {
           contractor: 1,
           clientId: 1,
           roomId: 1,
           chatId: "$_id",
-          lastMessage: "$chats.message",
+          lastMessage: "$chats.lastMsg.message",
+          unreadMessageCount: "$chats.unreadMsgCount.count",
         },
       },
     ]);
+
     return { success: true, response };
   } catch (error) {
     console.log(error);

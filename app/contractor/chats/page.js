@@ -4,10 +4,51 @@ import React, { useEffect, useState } from "react";
 import ChatWindow from "./components/chatWindow";
 import ChatSidebar from "./components/chatSider";
 import { gettingChatsForContractors } from "@/serverActions/contractorSideChatActions";
+import socket from "@/config/socket.config";
+import { authAndGetUser } from "@/helpers/authAndGetUser";
 
 export default function MessagesPage() {
   const [conversations, setConversations] = useState([]);
   const [active, setActive] = useState({});
+  const [messages, setMessages] = useState([]);
+
+  useEffect(() => {
+    async function joinRooms() {
+      const res = await authAndGetUser();
+      console.log("ress", res);
+      if (!res.success) return;
+      console.log("contractor joining");
+      socket.emit("joinAllRooms", { userId: res.id });
+    }
+    socket.on("connect", () => {
+      console.log(`Connected to server with ID: ${socket.id}`);
+      joinRooms();
+    });
+
+    if (socket.connected) joinRooms();
+    return () => socket.off("connect");
+  }, []);
+
+  useEffect(() => {
+    socket.on("receiveMsg", (data) => {
+      console.log("Message received");
+      setConversations((prev) =>
+        prev.map((item) => {
+          return item.roomId === data.roomId
+            ? {
+                ...item,
+                unreadMessageCount: item.unreadMessageCount + 1,
+                lastMessage: data.message,
+              }
+            : item;
+        }),
+      );
+      console.log(active);
+      if (Object.keys(active).length > 0)
+        setMessages((prev) => [...prev, data]);
+    });
+    return () => socket.off("receiveMsg");
+  }, [active]);
 
   useEffect(() => {
     async function fetchData() {
@@ -21,12 +62,12 @@ export default function MessagesPage() {
             clientName: convo.client.name,
             clientId: convo.client.id,
             lastMessage: convo.lastMessage || "start conversation",
+            unreadMsgCount: convo.unreadMsgCount || 0,
           };
         });
 
         setConversations(convos);
       }
-      console.log(result.response);
     }
     fetchData();
   }, []);
@@ -55,10 +96,14 @@ export default function MessagesPage() {
         <ChatSidebar
           conversations={conversations}
           activeId={active.chatId}
-          onSelect={setActive}
+          setActive={setActive}
         />
 
-        <ChatWindow active={active} />
+        <ChatWindow
+          active={active}
+          setMessages={setMessages}
+          messages={messages}
+        />
       </div>
     </div>
   );
