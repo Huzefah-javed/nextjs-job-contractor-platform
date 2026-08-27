@@ -32,18 +32,18 @@ export default function MessagesPage() {
   useEffect(() => {
     socket.on("receiveMsg", (data) => {
       console.log("Message received");
-      setConversations((prev) =>
-        prev.map((item) => {
-          return item.roomId === data.roomId
-            ? {
-                ...item,
-                unreadMessageCount: item.unreadMessageCount + 1,
-                lastMessage: data.message,
-              }
-            : item;
-        }),
-      );
-      console.log(active);
+      let convo = conversations.filter(
+        (item) => item.roomId === data.roomId,
+      )[0];
+
+      convo.lastMessage = data.message;
+      convo.unreadMessageCount = convo.unreadMessageCount + 1;
+
+      const fil = conversations.filter((item) => item.roomId !== data.roomId);
+
+      
+      setConversations([convo, ...fil]);
+
       if (Object.keys(active).length > 0)
         setMessages((prev) => [...prev, data]);
     });

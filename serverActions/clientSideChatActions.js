@@ -71,3 +71,16 @@ export const gettingChatsForClients = async () => {
     return { success: false, error: error };
   }
 };
+
+export const readMsgAction = async (chatId, senderId) => {
+  if (!senderId || !chatId) return false;
+  try {
+    await dbConnect();
+    await Message.updateMany({ chatId, senderId }, { read: true });
+    console.log("success ");
+    return true;
+  } catch (err) {
+    console.log(err);
+    return false;
+  }
+};

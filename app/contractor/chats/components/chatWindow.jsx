@@ -1,6 +1,7 @@
 "use client";
 
 import socket from "@/config/socket.config";
+import { readMsgAction } from "@/serverActions/clientSideChatActions";
 import {
   MessageAction,
   MessageLoadAction,
@@ -16,6 +17,11 @@ export default function ChatWindow({ active, setMessages, messages }) {
       if (res.success) setMessages(res.response);
     }
     fetchMsgs();
+    return () => {
+      (async () => {
+        await readMsgAction(active.chatId, active.clientId);
+      })();
+    };
   }, [active]);
 
   console.log(messages);
@@ -28,15 +34,15 @@ export default function ChatWindow({ active, setMessages, messages }) {
       message: inputText,
       senderId: active.contractorId || "mf34f",
     });
-    // setMessages((prev) => [
-    //   ...prev,
-    //   {
-    //     roomId: active.roomId,
-    //     message: inputText,
-    //     senderId: active.contractorId,
-    //   },
-    // ]);
-    // await MessageAction(active?.chatId, inputText);
+    setMessages((prev) => [
+      ...prev,
+      {
+        roomId: active.roomId,
+        message: inputText,
+        senderId: active.contractorId,
+      },
+    ]);
+    await MessageAction(active?.chatId, inputText);
 
     setInputText("");
   };

@@ -30,22 +30,21 @@ export default function MessagesPage() {
   }, []);
 
   useEffect(() => {
-    socket.on("receiveMsg", (data) => {
-      console.log("Message received");
-        setConversations((prev) =>
-          prev.map((item) => {
-            return item.roomId === data.roomId
-              ? {
-                  ...item,
-                  unreadMessageCount: item.unreadMessageCount + 1,
-                  lastMessage: data.message,
-                }
-              : item;
-          }),
-        );
-        console.log(active);
-        if (Object.keys(active).length > 0)
-          setMessages((prev) => [...prev, data]);
+    socket.on("receiveMsg", async (data) => {
+      console.log("Message received", data);
+      let convo = conversations.filter(
+        (item) => item.roomId === data.roomId,
+      )[0];
+      const fil = conversations.filter((item) => item.roomId !== data.roomId);
+
+      convo.lastMessage = data.message;
+
+      if (active?.roomId !== data.roomId)
+        convo.unreadMessageCount = convo.unreadMessageCount + 1;
+      setConversations([convo, ...fil]);
+
+      if (Object.keys(active).length > 0)
+        setMessages((prev) => [...prev, data]);
     });
     return () => socket.off("receiveMsg");
   }, [active]);
