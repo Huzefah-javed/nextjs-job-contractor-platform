@@ -37,7 +37,12 @@ export const gettingChatsForContractors = async () => {
       },
       { $unwind: "$chats" },
       { $unwind: "$chats.lastMsg" },
-      { $unwind: "$chats.unreadMsgCount" },
+      {
+        $unwind: {
+          path: "$chats.unreadMsgCount",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
       {
         $lookup: {
           from: "users",

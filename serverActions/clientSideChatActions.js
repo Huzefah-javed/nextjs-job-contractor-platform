@@ -42,7 +42,12 @@ export const gettingChatsForClients = async () => {
         },
       },
       { $unwind: "$chats.lastMsg" },
-      { $unwind: "$chats.unreadMsgCount" },
+      {
+        $unwind: {
+          path: "$chats.unreadMsgCount",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
       {
         $lookup: {
           from: "users",
@@ -76,7 +81,10 @@ export const readMsgAction = async (chatId, senderId) => {
   if (!senderId || !chatId) return false;
   try {
     await dbConnect();
-    await Message.updateMany({ chatId, senderId }, { read: true });
+    await Message.updateMany(
+      { chatId, senderId: { $ne: senderId } },
+      { read: true },
+    );
     console.log("success ");
     return true;
   } catch (err) {

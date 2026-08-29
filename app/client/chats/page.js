@@ -28,26 +28,29 @@ export default function MessagesPage() {
     if (socket.connected) joinRooms();
     return () => socket.off("connect");
   }, []);
+  console.log("conversation: A ", conversations);
 
   useEffect(() => {
     socket.on("receiveMsg", async (data) => {
       console.log("Message received", data);
+
       let convo = conversations.filter(
         (item) => item.roomId === data.roomId,
       )[0];
+
       const fil = conversations.filter((item) => item.roomId !== data.roomId);
-
       convo.lastMessage = data.message;
-
-      if (active?.roomId !== data.roomId)
-        convo.unreadMessageCount = convo.unreadMessageCount + 1;
       setConversations([convo, ...fil]);
-
-      if (Object.keys(active).length > 0)
+      console.log("cond: ", Object.keys(active).length > 0);
+      if (Object.keys(active).length > 0) {
         setMessages((prev) => [...prev, data]);
+      } else {
+        console.log("active: ", active);
+        convo.unreadMessageCount = convo.unreadMessageCount + 1;
+      }
     });
     return () => socket.off("receiveMsg");
-  }, [active]);
+  }, [active, conversations]);
 
   useEffect(() => {
     async function fetchData() {
@@ -62,7 +65,7 @@ export default function MessagesPage() {
             contractorId: convo.contractor._id,
             contractorName: convo.contractor.name,
             lastMessage: convo.lastMessage,
-            unreadMessageCount: convo.unreadMessageCount,
+            unreadMessageCount: convo?.unreadMessageCount || 0,
           };
         });
 
@@ -95,6 +98,7 @@ export default function MessagesPage() {
       <div className="flex flex-col lg:flex-row gap-3 w-full min-h-screen max-h-screen">
         <ChatSidebar
           conversations={conversations}
+          setConversations={setConversations}
           activeId={active.chatId}
           setActive={setActive}
         />

@@ -1,8 +1,26 @@
 "use client";
 
+import { readMsgAction } from "@/serverActions/clientSideChatActions";
 import React from "react";
 
-export default function ChatSidebar({ conversations, activeId, setActive }) {
+export default function ChatSidebar({
+  conversations,
+  activeId,
+  setActive,
+  setConversations,
+}) {
+  const handleClick = async (item) => {
+    setActive(item);
+    const response = await readMsgAction(item.chatId, item.contractorId);
+    if (response) {
+      setConversations((prev) =>
+        prev.map((chat) =>
+          chat.chatId === item.chatId ? { ...chat, unreadMsgCount: 0 } : chat,
+        ),
+      );
+    }
+  };
+
   return (
     <div className=" border border-slate-200/80 rounded-[2rem] bg-white p-5 shadow-sm flex flex-col gap-4">
       <h2 className="text-[11px] font-bold tracking-wider text-slate-400 uppercase px-1">
@@ -17,7 +35,7 @@ export default function ChatSidebar({ conversations, activeId, setActive }) {
           return (
             <button
               key={item.id}
-              onClick={() => setActive(item)}
+              onClick={() => handleClick(item)}
               className={`w-full text-left p-3 rounded-2xl border transition-all flex items-center gap-3 ${
                 isActive
                   ? "border-emerald-500 bg-slate-50/80 shadow-sm ring-1 ring-emerald-500/20"

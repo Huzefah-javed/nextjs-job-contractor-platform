@@ -17,11 +17,7 @@ export default function ChatWindow({ active, setMessages, messages }) {
       if (res.success) setMessages(res.response);
     }
     fetchMsgs();
-    return () => {
-      (async () => {
-        await readMsgAction(active.chatId, active.clientId);
-      })();
-    };
+    return () => readMsgAction(active.chatId, active.clientId);
   }, [active]);
 
   console.log(messages);

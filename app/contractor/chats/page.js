@@ -37,18 +37,19 @@ export default function MessagesPage() {
       )[0];
 
       convo.lastMessage = data.message;
-      convo.unreadMessageCount = convo.unreadMessageCount + 1;
 
       const fil = conversations.filter((item) => item.roomId !== data.roomId);
 
-      
       setConversations([convo, ...fil]);
 
-      if (Object.keys(active).length > 0)
+      if (Object.keys(active).length > 0) {
         setMessages((prev) => [...prev, data]);
+      } else {
+        convo.unreadMsgCount = convo.unreadMsgCount + 1;
+      }
     });
     return () => socket.off("receiveMsg");
-  }, [active]);
+  }, [active, conversations]);
 
   useEffect(() => {
     async function fetchData() {
@@ -62,7 +63,7 @@ export default function MessagesPage() {
             clientName: convo.client.name,
             clientId: convo.client.id,
             lastMessage: convo.lastMessage || "start conversation",
-            unreadMsgCount: convo.unreadMsgCount || 0,
+            unreadMsgCount: convo?.unreadMsgCount || 0,
           };
         });
 
@@ -97,6 +98,7 @@ export default function MessagesPage() {
           conversations={conversations}
           activeId={active.chatId}
           setActive={setActive}
+          setConversations={setConversations}
         />
 
         <ChatWindow
