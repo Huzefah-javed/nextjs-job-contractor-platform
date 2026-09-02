@@ -41,11 +41,9 @@ export default function MessagesPage() {
       const fil = conversations.filter((item) => item.roomId !== data.roomId);
       convo.lastMessage = data.message;
       setConversations([convo, ...fil]);
-      console.log("cond: ", Object.keys(active).length > 0);
       if (Object.keys(active).length > 0) {
         setMessages((prev) => [...prev, data]);
       } else {
-        console.log("active: ", active);
         convo.unreadMessageCount = convo.unreadMessageCount + 1;
       }
     });

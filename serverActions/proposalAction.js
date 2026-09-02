@@ -152,47 +152,34 @@ export async function updateProposalStatusAction(payload) {
     const objectProposalId = new mongoose.Types.ObjectId(proposalId);
     const objectJobId = new mongoose.Types.ObjectId(jobId);
 
-    let paymentUrl = null;
-
     if (status === "accepted") {
       const { transactionId, nextUrl } = await createTransaction({});
 
-      // await Proposal.updateMany(
-      //   { jobId: objectJobId },
-      //   [
-      //     {
-      //       $set: {
-      //         status: {
-      //           $cond: {
-      //             if: { $eq: ["$_id", objectProposalId] },
-      //             then: "accepted",
-      //             else: "rejected",
-      //           },
-      //         },
-      //         nextUrl: {
-      //           $cond: {
-      //             if: { $eq: ["$_id", objectProposalId] },
-      //             then: nextUrl,
-      //             else: null,
-      //           },
-      //         },
-      //       },
-      //     },
-      //   ],
-      //   { updatePipeline: true },
-      // );
-
-      // await ProjectPost.findByIdAndUpdate(objectJobId, {
-      //   projectPhase: "inProgress",
-      // })
       await Promise.all([
+        Proposal.updateMany(
+          { jobId: objectJobId },
+          [
+            {
+              $set: {
+                status: {
+                  $cond: {
+                    if: { $eq: ["$_id", objectProposalId] },
+                    then: "accepted",
+                    else: "rejected",
+                  },
+                },
+              },
+            },
+          ],
+          { updatePipeline: true },
+        ),
+
         Proposal.updateMany(
           { jobId: objectJobId },
           {
             nextUrl,
             escrowStatus: "termsPending",
             transactionId,
-            status: "accepted",
           },
         ),
         ProjectPost.findByIdAndUpdate(objectJobId, {
@@ -202,8 +189,6 @@ export async function updateProposalStatusAction(payload) {
           escrowStatus: "pending",
         }),
       ]);
-
-      paymentUrl = `https://www.escrow-sandbox.com/transactions/${transactionId}/payment`;
     } else {
       await Proposal.findByIdAndUpdate(objectProposalId, {
         status,
@@ -212,11 +197,7 @@ export async function updateProposalStatusAction(payload) {
     }
 
     revalidatePath(`/client/activeJobs/${jobId}/proposal`);
-    const obj = {
-      success: true,
-    };
-    if (paymentUrl) obj.paymentUrl = paymentUrl;
-    return obj;
+    return { success: true };
   } catch (error) {
     console.error("Error updating proposal status:", error);
     return { success: false, message: "Failed to update status." };

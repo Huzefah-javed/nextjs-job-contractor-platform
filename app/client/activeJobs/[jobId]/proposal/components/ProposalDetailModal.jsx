@@ -219,7 +219,6 @@ export default function ProposalDetailModal({
                 </button>
                 <button
                   type="button"
-                  disabled={isPending}
                   onClick={() => handleStatusChange("rejected")}
                   className="px-4 py-1.5 rounded-lg text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white transition-all shadow-sm"
                 >

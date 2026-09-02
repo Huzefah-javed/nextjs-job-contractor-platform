@@ -29,8 +29,7 @@ export default function ProposalListInteractive({ initialProposals, jobId }) {
         });
 
         if (res?.success) {
-          console.log("success", res);
-          if (res.paymentUrl) router.push(res.paymentUrl);
+          // notify user about success
         } else {
           console.log(res);
         }

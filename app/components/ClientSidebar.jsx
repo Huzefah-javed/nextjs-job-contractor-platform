@@ -9,11 +9,12 @@ export default function ClientSidebar() {
   const pathname = usePathname();
 
   const menuItems = [
-    { label: "Dashboard", href: "/contractor/dashboard" },
-    { label: "Post New Project", href: "/contractor/post-project" },
-    { label: "My Projects", href: "/contractor/my-projects" },
-    { label: "Proposals Received", href: "/contractor/proposals" },
-    { label: "Messages", href: "/contractor/messages" },
+    { label: "Dashboard", href: "/client/dashboard" },
+    { label: "Post New Project", href: "/client/postProject" },
+    { label: "Active Listings", href: "/client/activeJobs" },
+    { label: "Active Projects", href: "/client/activeJobs" },
+    { label: "Escrow pending Projects", href: "/client/escrowPendings" },
+    { label: "chats", href: "/client/chats" },
   ];
 
   const contractors = [

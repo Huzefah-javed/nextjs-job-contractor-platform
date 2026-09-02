@@ -13,40 +13,43 @@ export default function Header() {
 
       <div className="flex items-center space-x-6 ml-auto">
         <nav className="flex items-center space-x-5 text-sm font-medium">
-          <a
-            href="#home"
+          <Link
+            href="/"
             className="text-[#22C55E] hover:opacity-80 transition-opacity"
           >
             Home
-          </a>
-          <a
-            href="#find-jobs"
+          </Link>
+          <Link
+            href="/contractor/exploreJobs"
             className="text-[#4B5563] hover:text-black transition-colors"
           >
             Find Jobs
-          </a>
-          <a
-            href="#hire-contractors"
+          </Link>
+          <Link
+            href="/client/activeJobs"
             className="text-[#4B5563] hover:text-black transition-colors"
           >
             Hire Contractors
-          </a>
+          </Link>
           <a
-            href="#my-projects"
+            href="/contractor/activeJobs"
             className="text-[#4B5563] hover:text-black transition-colors"
           >
-            My Projects
+            My Contracted Works
           </a>
         </nav>
 
         <div className="flex items-center space-x-3 text-sm font-medium">
           <button className="bg-[#16A34A] text-white px-5 py-2.5 rounded-full hover:bg-[#15803D] transition-colors shadow-sm">
-            Open Admin Dashboard
+            Open Dashboard
           </button>
 
-          <button className="border border-[#9CA3AF] text-[#1F2937] px-5 py-2.5 rounded-xl hover:bg-gray-50 transition-colors">
-            Sign in
-          </button>
+          <Link
+            href="/login"
+            className="border border-[#9CA3AF] text-[#1F2937] px-5 py-2.5 rounded-xl hover:bg-gray-50 transition-colors"
+          >
+            login in
+          </Link>
 
           <Link
             href="/signup"

@@ -10,11 +10,9 @@ export default function ContractorSidebar() {
 
   const menuItems = [
     { label: "Dashboard", href: "/contractor/dashboard" },
-    { label: "My Proposals", href: "/contractor/proposals" },
-    { label: "Active Projects", href: "/contractor/active-projects" },
-    { label: "Earnings & Escrow", href: "/contractor/earnings-escrow" },
-    { label: "Messages", href: "/contractor/messages" },
-    { label: "Subscription", href: "/contractor/subscription" },
+    { label: "Escrow  pendings", href: "/contractor/escrowPendings" },
+    { label: "find Jobs", href: "/contractor/exploreJobs" },
+    { label: "chats", href: "/contractor/chats" },
   ];
 
   const clients = [

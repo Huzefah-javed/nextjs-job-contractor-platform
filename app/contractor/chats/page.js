@@ -15,9 +15,7 @@ export default function MessagesPage() {
   useEffect(() => {
     async function joinRooms() {
       const res = await authAndGetUser();
-      console.log("ress", res);
       if (!res.success) return;
-      console.log("contractor joining");
       socket.emit("joinAllRooms", { userId: res.id });
     }
     socket.on("connect", () => {
@@ -37,7 +35,6 @@ export default function MessagesPage() {
       )[0];
 
       convo.lastMessage = data.message;
-
       const fil = conversations.filter((item) => item.roomId !== data.roomId);
 
       setConversations([convo, ...fil]);

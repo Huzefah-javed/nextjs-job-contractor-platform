@@ -8,10 +8,9 @@ export default function AdminSidebar() {
   const pathname = usePathname();
 
   const menuItems = [
-    { label: "Overview", href: "/admin/overview" },
-    { label: "User Management", href: "/admin/user-management" },
-    { label: "Contractor Approvals", href: "/admin/contractor-approvals" },
-    { label: "Job Approvals", href: "/admin/job-approvals" },
+    { label: "Dashboard", href: "/admin/dashboard" },
+    { label: "User Management", href: "/admin/userManagement" },
+    { label: "Job Approvals", href: "/admin/jobApprovals" },
     { label: "Escrow Tracking", href: "/admin/escrow-tracking" },
   ];
 

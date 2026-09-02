@@ -12,7 +12,7 @@ export default async function middleware(request) {
       const token = jwt.verify(authCookie, process.env.JWT_SECRET);
       if (!token) return NextResponse.redirect(new URL("/", request.url));
       if (path.slice(1, token.role.length + 1) !== token.role)
-        return NextResponse.redirect(new URL("/", request.url));
+        return NextResponse.redirect(new URL("/login", request.url));
       return NextResponse.next();
     } catch (err) {
       return NextResponse.redirect(new URL("/", request.url));
@@ -22,7 +22,7 @@ export default async function middleware(request) {
   if (sessionCookie) {
     try {
       const value = jwt.verify(sessionCookie, process.env.JWT_SECRET);
-      if (!value) return NextResponse.redirect(new URL("/", request.url));
+      if (!value) return NextResponse.redirect(new URL("/login", request.url));
 
       const response = await fetch(`${origin}/api/refreshToken`, {
         method: "POST",
@@ -35,7 +35,7 @@ export default async function middleware(request) {
       }
       const data = await response.json();
       if (path.slice(1, data.data.role.length + 1) !== data.data.role)
-        return NextResponse.redirect(new URL("/", request.url));
+        return NextResponse.redirect(new URL("/login", request.url));
 
       const res = NextResponse.next();
 
@@ -55,7 +55,6 @@ export default async function middleware(request) {
       return NextResponse.redirect(new URL("/", request.url));
     }
   }
-
   return NextResponse.redirect(new URL("/", request.url));
 }
 

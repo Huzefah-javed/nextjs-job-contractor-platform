@@ -104,10 +104,6 @@ export default function ClientEscrowPendingPage() {
               </thead>
               <tbody className="divide-y divide-slate-100 text-xs">
                 {jobs.map((item) => {
-                  const proposal = item.selectedProposalId || {};
-                  const contractor = proposal.contractorId || {};
-                  const budget = proposal.proposedBudget || item.budget || 0;
-
                   const dateStr = item.createdAt
                     ? new Date(item.createdAt).toLocaleDateString("en-US", {
                         month: "short",
@@ -124,18 +120,19 @@ export default function ClientEscrowPendingPage() {
                       {/* Job Title & Preview */}
                       <td className="py-4 px-5 max-w-xs">
                         <h2 className="font-bold text-slate-900 text-xs truncate">
-                          {item.projectTitle.slice(0,10) + "..." || "Untitled Job"}
+                          {item.projectTitle.slice(0, 10) + "..." ||
+                            "Untitled Job"}
                         </h2>
                       </td>
 
                       {/* Contractor Name */}
                       <td className="py-4 px-5 font-semibold text-slate-700 whitespace-nowrap">
-                        {contractor.name || "Contractor"}
+                        {item.contractorName || "Contractor"}
                       </td>
 
                       {/* Proposed Budget */}
                       <td className="py-4 px-5 font-black text-[#11b017] whitespace-nowrap">
-                        ${budget.toLocaleString()}
+                        ${item.proposedBudget.toLocaleString()}
                       </td>
 
                       {/* Date */}
