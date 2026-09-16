@@ -10,6 +10,7 @@ export default function ContractorSidebar() {
 
   const menuItems = [
     { label: "Dashboard", href: "/contractor/dashboard" },
+    { label: "My projects", href: "/contractor/myProjects" },
     { label: "Escrow  pendings", href: "/contractor/escrowPendings" },
     { label: "find Jobs", href: "/contractor/exploreJobs" },
     { label: "chats", href: "/contractor/chats" },

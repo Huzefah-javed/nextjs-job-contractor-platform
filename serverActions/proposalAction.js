@@ -153,8 +153,6 @@ export async function updateProposalStatusAction(payload) {
     const objectJobId = new mongoose.Types.ObjectId(jobId);
 
     if (status === "accepted") {
-      const { transactionId, nextUrl } = await createTransaction({});
-
       await Promise.all([
         Proposal.updateMany(
           { jobId: objectJobId },
@@ -174,19 +172,9 @@ export async function updateProposalStatusAction(payload) {
           { updatePipeline: true },
         ),
 
-        Proposal.updateMany(
-          { jobId: objectJobId },
-          {
-            nextUrl,
-            escrowStatus: "termsPending",
-            transactionId,
-          },
-        ),
         ProjectPost.findByIdAndUpdate(objectJobId, {
           selectedProposalId: objectProposalId,
-          transactionId,
-          projectPhase: "inProgress",
-          escrowStatus: "pending",
+          projectPhase: "hired",
         }),
       ]);
     } else {

@@ -31,6 +31,7 @@ export default async function ApprovedJobsPage() {
         $match: {
           status: "approved",
           clientId: objClientId,
+          projectPhase: "acceptingProposals",
         },
       },
       { $sort: { createdAt: -1 } },

@@ -47,7 +47,7 @@ export const projectPostSchema = z.object({
       publicId: z.string().optional().default(""),
     })
     .optional()
-    .default({ url: "", publicId: "", fileName: "" }),
+    .default({ publicId: "", secureUrl: "" }),
 
   status: z.enum(["approved", "reject", "pending"]).default("pending"),
   projectPhase: z

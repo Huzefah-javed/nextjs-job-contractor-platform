@@ -18,7 +18,7 @@ export async function getProjectsPaginatedAction(
     const query =
       projectStatus === "pending"
         ? { status: { $ne: "approved" } }
-        : { status: { $eq: "approved" } };
+        : { status: { $eq: "approved" }, projectPhase: "acceptingProposals" };
 
     let [projects, totalProjects] = await Promise.all([
       ProjectPost.find(query)

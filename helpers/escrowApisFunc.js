@@ -3,57 +3,52 @@ import { escrowApi } from "@/config/escrow.config";
 export const createTransaction = async ({
   sellerEmail,
   buyerEmail,
-  amount,
+  jobTitle,
   jobDescription,
   inspectionPeriod,
+  milestones,
 }) => {
+  const itemType = milestones.length > 1 ? "milestone" : "general_merchandise";
+
+  const items = milestones.map((milestone) => ({
+    title: milestone.title,
+    description: milestone.description || milestone.title,
+    type: itemType,
+    inspection_period: inspectionPeriod || 259200 * 5,
+    quantity: 1,
+    schedule: [
+      {
+        amount: milestone.amount,
+        payer_customer: "huzefahjaved@gmail.com" || buyerEmail,
+        beneficiary_customer: "devbyhuzefah@gmail.com" || sellerEmail,
+      },
+    ],
+  }));
+
   const postData = {
     parties: [
       {
         role: "buyer",
-        customer: buyerEmail || "huzefahjaved@gmail.com",
+        customer: "huzefahjaved@gmail.com" || buyerEmail,
       },
       {
         role: "seller",
-        customer: sellerEmail || "devbyhuzefah@gmail.com",
+        customer: "devbyhuzefah@gmail.com" || sellerEmail,
       },
     ],
     currency: "usd",
-    description: jobDescription || "Test Job Payment",
-    items: [
-      {
-        title: "Test Job",
-        description: "Testing escrow integration",
-        type: "general_merchandise",
-        inspection_period: inspectionPeriod || 259200 * 5,
-        quantity: 1,
-        schedule: [
-          {
-            amount: amount || 500.0,
-            payer_customer: buyerEmail || "huzefahjaved@gmail.com",
-            beneficiary_customer: sellerEmail || "devbyhuzefah@gmail.com",
-          },
-        ],
-      },
-    ],
+    description: jobTitle.slice(0, 250),
+    items,
   };
+
   const result = await escrowApi.post("/transaction", postData);
 
   const data = {
     transactionId: result.data.id,
     nextUrl: result.data.parties.filter((a) => Object.hasOwn(a, "next_step"))[0]
       ?.next_step,
+    milestoneIds: result.data.items.map((item) => item.id),
   };
 
   return data;
 };
-
-// export const getClientEscrowPaymentLink = async (transactionId) => {
-//   const { data } = await escrowApi.post(
-//     `https://api.escrow-sandbox.com/2017-09-01/transaction/${transactionId}/payment_methods/credit_card`,
-//     {},
-//   );
-
-//   console.log(data);
-//   return data?.landing_page || null;
-// };

@@ -11,15 +11,21 @@ export const postProjectAction = async (prevState, form) => {
   if (!res.success) return { success: false };
   form.clientId = res.id;
 
-  let fileToUpload = form.imageFiles;
-  fileToUpload.push(form.documentFile);
+  let fileToUpload = form?.imageFiles?.length > 0 ? form.imageFiles : [];
+  if (Object.hasOwn(form, "documentFile")) fileToUpload.push(form.documentFile);
 
-  const uploadResponse = await Promise.all(
-    fileToUpload.map((file) => uploadToCloud(file, "projectsFiles")),
-  );
-
-  form.documentFile = uploadResponse[uploadResponse.length - 1];
-  form.imageFiles = uploadResponse.slice(0, uploadResponse.length - 1);
+  if (fileToUpload.length > 0) {
+    const uploadResponse = await Promise.all(
+      fileToUpload.map((file) => uploadToCloud(file, "projectsFiles")),
+    );
+    
+    if (Object.hasOwn(form, "documentFile")) {
+      form.documentFile = uploadResponse[uploadResponse.length - 1];
+      form.imageFiles = uploadResponse.slice(0, uploadResponse.length - 1);
+    } else {
+      form.imageFiles = uploadResponse;
+    }
+  }
 
   const result = projectPostSchema.safeParse(form);
   if (!result.success) {

@@ -27,12 +27,12 @@ export default function PostProjectForm() {
       projectDuration: formData.get("projectDuration"),
       location: formData.get("location"),
       startDate: formData.get("startDate"),
-      imageFiles,
-      documentFile: formData.get("documentFile"),
       status: "pending",
     };
 
-    console.log("Form Payload Args:", payload);
+    if (imageFiles.length > 0) payload.imageFiles = imageFiles;
+    if (formData.get("documentFile")?.size > 0)
+      payload.documentFile = formData.get("documentFile");
 
     await formAction(payload);
   };
@@ -46,10 +46,7 @@ export default function PostProjectForm() {
         Post Details
       </h2>
 
-      <form
-        action={(formData) => handleForm(formData, "pending")}
-        className="space-y-5"
-      >
+      <form action={handleForm} className="space-y-5">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-semibold text-gray-400 mb-1">
@@ -327,14 +324,6 @@ export default function PostProjectForm() {
 
         {/* Action Buttons */}
         <div className="flex items-center gap-4 pt-4">
-          <button
-            type="submit"
-            formAction={(formData) => handleForm(formData, "draft")}
-            className="px-6 py-2.5 rounded-xl bg-gray-200 hover:bg-gray-300 text-gray-600 text-xs font-bold transition-all"
-          >
-            Save Draft
-          </button>
-
           <button
             type="submit"
             formAction={(formData) => handleForm(formData, "pending")}

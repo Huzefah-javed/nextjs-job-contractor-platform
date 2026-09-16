@@ -11,8 +11,8 @@ export default function ClientSidebar() {
   const menuItems = [
     { label: "Dashboard", href: "/client/dashboard" },
     { label: "Post New Project", href: "/client/postProject" },
-    { label: "Active Listings", href: "/client/activeJobs" },
-    { label: "Active Projects", href: "/client/activeJobs" },
+    { label: "Hired Projects", href: "/client/hiredProjects" },
+    { label: "Open for Proposals", href: "/client/proposalJobs" },
     { label: "Escrow pending Projects", href: "/client/escrowPendings" },
     { label: "chats", href: "/client/chats" },
   ];
