@@ -174,7 +174,7 @@ export async function updateProposalStatusAction(payload) {
 
         ProjectPost.findByIdAndUpdate(objectJobId, {
           selectedProposalId: objectProposalId,
-          projectPhase: "hired",
+          projectPhase: "milestoneSetup",
         }),
       ]);
     } else {

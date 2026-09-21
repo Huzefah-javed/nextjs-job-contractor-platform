@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import { CheckCircle2, Circle } from "lucide-react";
 import ClientMilestoneReviewModal from "./ClientMilestoneReviewModal";
 import MilestoneReviewModal from "./MilestoneReviewModal";
 
@@ -108,21 +107,13 @@ export default function ProjectCard({ project, activeTab, onReview }) {
           onApprove={() =>
             onReview({
               projectId: project._id,
-              milestones: milestones,
-              jobTitle: title,
-              jobDescription: description,
               action: "approve",
-              sellerId: project?.selectedProposalId?.contractorId,
             })
           }
           onReject={() =>
             onReview({
               projectId: project._id,
-              milestones: milestones,
-              jobTitle: title,
-              jobDescription: description,
               action: "reject",
-              sellerId: project?.selectedProposalId?.contractorId,
             })
           }
         />

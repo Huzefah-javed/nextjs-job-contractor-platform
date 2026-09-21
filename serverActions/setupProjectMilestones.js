@@ -4,10 +4,6 @@ import { ProjectPost } from "@/schemas/project.schema";
 
 export async function setupProjectMilestones(projectId, milestones) {
   try {
-    const isSingleDelivery =
-      milestones.length === 1 && milestones[0].title === "Full Project Delivery";
-    const completionType = isSingleDelivery ? "single" : "milestones";
-
     const formattedMilestones = milestones.map((milestone) => {
       const numWeeks = parseFloat(milestone.weeks) || 0;
       return {
@@ -22,7 +18,6 @@ export async function setupProjectMilestones(projectId, milestones) {
     const updatedDocument = await ProjectPost.findByIdAndUpdate(
       projectId,
       {
-        completionType: completionType,
         milestoneApproved: "pending",
         milestones: formattedMilestones,
       },

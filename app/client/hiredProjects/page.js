@@ -34,22 +34,11 @@ export default function HiredProjectsPage() {
     });
   }, [activeTab]);
 
-  const handleReview = async ({
-    projectId,
-    milestones,
-    jobTitle,
-    jobDescription,
-    action,
-    sellerId,
-  }) => {
+  const handleReview = async ({ projectId, action }) => {
     startTransition(async () => {
       const res = await reviewMilestonesAction({
         projectId,
-        milestones,
-        jobTitle,
-        jobDescription,
         action,
-        sellerId,
       });
       if (res.success) {
         const updated = await getHiredProjects(activeTab);

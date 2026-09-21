@@ -13,7 +13,8 @@ export default function ClientSidebar() {
     { label: "Post New Project", href: "/client/postProject" },
     { label: "Hired Projects", href: "/client/hiredProjects" },
     { label: "Open for Proposals", href: "/client/proposalJobs" },
-    { label: "Escrow pending Projects", href: "/client/escrowPendings" },
+    { label: "Escrow funding Projects", href: "/client/escrowFundPendings" },
+    { label: "Escrow terms pending", href: "/client/escrowTermsPendings" },
     { label: "chats", href: "/client/chats" },
   ];
 

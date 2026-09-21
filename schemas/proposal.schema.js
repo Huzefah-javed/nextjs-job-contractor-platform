@@ -55,18 +55,10 @@ const proposalSchema = new mongoose.Schema(
       trim: true,
       default: null,
     },
-    nextUrl: {
-      type: String,
+    escrowId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Escrow",
       default: null,
-    },
-    transactionId: {
-      type: String,
-      default: null,
-    },
-    escrowStatus: {
-      type: String,
-      enum: ["not_initiated", "termsPending", "accepted"],
-      default: "not_initiated",
     },
   },
   {

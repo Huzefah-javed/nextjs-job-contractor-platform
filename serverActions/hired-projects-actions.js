@@ -16,8 +16,10 @@ export async function getHiredProjects(filter) {
       status: "approved",
     };
     if (filter === "awaiting_milestones") {
+      query.projectPhase = "milestoneSetup";
       query.milestoneApproved = { $in: ["awaitingApproval", "rejected"] };
     } else if (filter === "milestone_ready") {
+      query.projectPhase = "milestoneSetup";
       query.milestoneApproved = "pending";
     } else if (filter === "completed") {
       query.projectPhase = "completed";
@@ -27,7 +29,7 @@ export async function getHiredProjects(filter) {
 
     const projects = await ProjectPost.find(query)
       .select(
-        "_id projectTitle projectDescription projectCategory projectDuration startDate projectPhase milestoneApproved selectedProposalId milestones createdAt updatedAt",
+        "_id projectTitle projectDescription projectCategory projectDuration startDate projectPhase milestoneApproved milestones createdAt updatedAt",
       )
       .populate({
         path: "selectedProposalId",
@@ -46,71 +48,18 @@ export async function getHiredProjects(filter) {
   }
 }
 
-export async function reviewMilestonesAction({
-  projectId,
-  milestones,
-  jobTitle,
-  jobDescription,
-  action,
-  sellerId,
-}) {
+export async function reviewMilestonesAction({ projectId, action }) {
   try {
     await dbConnect();
     const res = await authAndGetUser();
     if (!res?.success) return { success: false };
-    const buyerId = res.id;
-    console.log("res......", res);
-
-    const { email: sellerEmail } = await users.findOne(
-      new mongoose.Types.ObjectId(sellerId),
-      "email",
-    );
-    const { companyEmail: buyerEmail } = await users.findOne(
-      new mongoose.Types.ObjectId(buyerId),
-      "companyEmail",
-    );
 
     const newStatus = action === "approve" ? "approved" : "rejected";
     const objectJobId = new mongoose.Types.ObjectId(projectId);
-    if (newStatus === "approved") {
-      const { transactionId, nextUrl, milestoneIds } = await createTransaction({
-        milestones,
-        buyerEmail,
-        sellerEmail,
-        jobTitle,
-        jobDescription,
-      });
-      const [_, projectJob] = await Promise.all([
-        Proposal.updateMany(
-          { jobId: objectJobId },
-          {
-            nextUrl,
-            escrowStatus: "termsPending",
-            transactionId,
-          },
-        ),
-        ProjectPost.findByIdAndUpdate(objectJobId, {
-          transactionId,
-          escrowStatus: "pending",
-          milestoneApproved: newStatus,
-        })
-          .select("milestones")
-          .lean(),
-      ]);
-      console.log("projectJob ", projectJob);
-      const updatedMilestones = projectJob?.milestones.map((milestone, id) => ({
-        ...milestone,
-        escrowMilestoneId: milestoneIds[id],
-      }));
-      console.log("updatedMilestones ", updatedMilestones);
-      await ProjectPost.findByIdAndUpdate(objectJobId, {
-        milestones: updatedMilestones,
-      });
-    } else {
-      await ProjectPost.findByIdAndUpdate(objectJobId, {
-        milestoneApproved: newStatus,
-      });
-    }
+    const query = { milestoneApproved: newStatus };
+    if (newStatus === "approved") query.projectPhase = "pendingEscrowCreation";
+
+    await ProjectPost.findByIdAndUpdate(objectJobId, query);
 
     revalidatePath("/client/hiredProjects");
     return { success: true };
