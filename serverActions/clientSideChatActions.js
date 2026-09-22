@@ -45,7 +45,7 @@ export const gettingChatsForClients = async () => {
       {
         $unwind: {
           path: "$chats.unreadMsgCount",
-          preserveNullAndEmptyArrays: true,
+           preserveNullAndEmptyArrays: true,
         },
       },
       {

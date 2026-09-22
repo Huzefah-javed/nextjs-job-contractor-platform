@@ -26,7 +26,7 @@ export async function getContractorProjectsAction(phase = "active") {
     if (phase !== "all") {
       projectMatch.projectPhase = phase;
     } else {
-      projectMatch.projectPhase = { $in: ["hired", "active", "completed"] };
+      projectMatch.projectPhase = { $in: ["milestoneSetup", "active", "completed"] };
     }
 
     const proposalsWithProjects = await Proposal.aggregate([

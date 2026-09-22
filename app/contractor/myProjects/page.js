@@ -19,14 +19,14 @@ export default function MyProjectsPage() {
   const filters = [
     { label: "All Projects", value: "all" },
     { label: "Active", value: "active" },
-    { label: "milestone setup required", value: "hired" },
+    { label: "milestone setup required", value: "milestoneSetup" },
     { label: "Completed", value: "completed" },
   ];
 
   const filterDescriptions = {
     all: "View all of your project contracts across every phase.",
-    hired:
-      "The client has accepted your proposal! Set up your milestones now so the client can fund the escrow.",
+    milestoneSetup:
+      "The client has accepted your proposal! Set up your milestones",
     active:
       "These are your ongoing projects that you are currently working on.",
     completed:
@@ -200,7 +200,7 @@ export default function MyProjectsPage() {
                     </button>
                   )}
 
-                  {project.projectPhase === "hired" && (
+                  {project.projectPhase === "milestoneSetup" && (
                     <button
                       onClick={() =>
                         handleSetupMilestone(
