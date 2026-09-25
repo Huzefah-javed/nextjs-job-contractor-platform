@@ -19,7 +19,7 @@ export const createTransaction = async ({
     schedule: [
       {
         amount: milestone.amount,
-        payer_customer: "huzefahjaved@gmail.com" || buyerEmail,
+        payer_customer: "huzaifa@predawnsolutions.com" || buyerEmail,
         beneficiary_customer: "devbyhuzefah@gmail.com" || sellerEmail,
       },
     ],
@@ -29,11 +29,15 @@ export const createTransaction = async ({
     parties: [
       {
         role: "buyer",
-        customer: "huzefahjaved@gmail.com" || buyerEmail,
+        customer: "huzaifa@predawnsolutions.com" || buyerEmail,
       },
       {
         role: "seller",
         customer: "devbyhuzefah@gmail.com" || sellerEmail,
+      },
+      {
+        role: "broker",
+        customer: "huzefahjaved@gmail.com",
       },
     ],
     currency: "usd",
@@ -45,7 +49,9 @@ export const createTransaction = async ({
 
   const data = {
     transactionId: result.data.id,
-    nextUrl: result.data.parties.filter((a) => Object.hasOwn(a, "next_step"))[0]
+    buyerNextUrl: result.data.parties.filter((a) => a.role === "buyer")[0]
+      ?.next_step,
+    sellerNextUrl: result.data.parties.filter((a) => a.role === "seller")[0]
       ?.next_step,
     milestoneIds: result.data.items.map((item) => item.id),
   };

@@ -2,6 +2,7 @@
 
 import React from "react";
 import { User, Briefcase, DollarSign, ExternalLink } from "lucide-react";
+import { adminTransactionCreation } from "@/serverActions/adminTransactionCreation";
 
 export default function PendingEscrowCard({ project, onCreateTransaction }) {
   const {
@@ -13,7 +14,19 @@ export default function PendingEscrowCard({ project, onCreateTransaction }) {
     contractorEmail = "",
     amount = 0,
     selectedProposalId,
+    milestones,
   } = project || {};
+
+  const handleCreateTransaction = async () => {
+    await adminTransactionCreation({
+      projectId,
+      projectTitle,
+      milestones,
+      clientEmail,
+      contractorEmail,
+      selectedProposalId,
+    });
+  };
 
   return (
     <div className="bg-white border border-gray-200 rounded-[24px] p-6 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between gap-6">
@@ -90,7 +103,7 @@ export default function PendingEscrowCard({ project, onCreateTransaction }) {
           </button>
 
           <button
-            onClick={() => onCreateTransaction && onCreateTransaction(project)}
+            onClick={() => handleCreateTransaction(project)}
             className="bg-[#16A34A] hover:bg-green-700 text-white px-6 py-2.5 rounded-full font-semibold text-xs transition-all cursor-pointer shadow-sm flex items-center gap-2 shrink-0"
           >
             Create Transaction

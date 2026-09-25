@@ -10,7 +10,12 @@ export async function getPendingEscrowProjectsAction() {
     await dbConnect();
 
     const projects = await ProjectPost.aggregate([
-      { $match: { projectPhase: "pendingEscrowCreation" } },
+      {
+        $match: {
+          projectPhase: "pendingEscrowCreation",
+          milestoneApproved: "approved",
+        },
+      },
       {
         $lookup: {
           from: "users",
@@ -45,16 +50,18 @@ export async function getPendingEscrowProjectsAction() {
           projectTitle: { $ifNull: ["$projectTitle", "Untitled Project"] },
           selectedProposalId: { $toString: "$selectedProposalId" },
           clientName: { $ifNull: ["$client.name", "Unknown Client"] },
-          clientEmail: { $ifNull: ["$client.email", "N/A"] },
+          clientEmail: { $ifNull: ["$client.email", "$client.companyEmail"] },
           contractorName: {
             $ifNull: ["$contractor.name", "Unknown Contractor"],
           },
-          contractorEmail: { $ifNull: ["$contractor.email", "N/A"] },
+          milestones: "$milestones",
+          contractorEmail: {
+            $ifNull: ["$contractor.email", "$contractor.companyEmail"],
+          },
           amount: { $ifNull: ["$proposal.proposedBudget", 0] },
         },
       },
     ]);
-    console.log("projects: ", projects);
     return { success: true, data: projects };
   } catch (error) {
     console.error("Error fetching pending escrow projects:", error);
