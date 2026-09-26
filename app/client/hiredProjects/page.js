@@ -6,13 +6,13 @@ import {
   getHiredProjects,
   reviewMilestonesAction,
 } from "@/serverActions/hired-projects-actions";
-import ProjectCard from "./components/ProjectCards"; // adjust path if needed
+import ProjectCard from "./components/ProjectCards";
 
-// Define tabs outside component to avoid recreation on each render
 const FILTER_TABS = [
   { id: "milestone_ready", label: "Milestone Ready" },
   { id: "active", label: "Active Projects" },
   { id: "awaiting_milestones", label: "Awaiting Milestones" },
+  { id: "hiredAwaitingEscrowFulfillment", label: "Escrow pendings" },
   { id: "completed", label: "Completed Projects" },
 ];
 

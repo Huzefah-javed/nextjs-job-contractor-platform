@@ -26,8 +26,16 @@ export async function getContractorProjectsAction(phase = "active") {
     if (phase !== "all") {
       projectMatch.projectPhase = phase;
     } else {
-      projectMatch.projectPhase = { $in: ["milestoneSetup", "active", "completed"] };
+      projectMatch.projectPhase = {
+        $in: [
+          "milestoneSetup",
+          "active",
+          "completed",
+          "hiredAwaitingEscrowFulfillments",
+        ],
+      };
     }
+    console.log(projectMatch);
 
     const proposalsWithProjects = await Proposal.aggregate([
       {
@@ -60,7 +68,7 @@ export async function getContractorProjectsAction(phase = "active") {
         },
       },
     ]);
-
+    console.log(proposalsWithProjects);
     const formattedProjects = proposalsWithProjects.map((project) => {
       const data = {
         id: project.id.toString(),

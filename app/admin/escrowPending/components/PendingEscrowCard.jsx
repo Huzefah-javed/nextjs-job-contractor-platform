@@ -18,7 +18,7 @@ export default function PendingEscrowCard({ project, onCreateTransaction }) {
   } = project || {};
 
   const handleCreateTransaction = async () => {
-    await adminTransactionCreation({
+    const result = await adminTransactionCreation({
       projectId,
       projectTitle,
       milestones,
@@ -26,6 +26,8 @@ export default function PendingEscrowCard({ project, onCreateTransaction }) {
       contractorEmail,
       selectedProposalId,
     });
+
+    console.log(result);
   };
 
   return (

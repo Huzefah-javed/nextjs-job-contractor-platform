@@ -20,6 +20,7 @@ export default function MyProjectsPage() {
     { label: "All Projects", value: "all" },
     { label: "Active", value: "active" },
     { label: "milestone setup required", value: "milestoneSetup" },
+    { label: "Escrow pendings", value: "hiredAwaitingEscrowFulfillment" },
     { label: "Completed", value: "completed" },
   ];
 

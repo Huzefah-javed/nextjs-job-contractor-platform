@@ -12,8 +12,14 @@ import { revalidatePath } from "next/cache";
 export async function getHiredProjects(filter) {
   try {
     await dbConnect();
+    const response = await authAndGetUser();
+    if (!response.success) {
+      return { success: false, message: "Unauthorized. Please log in." };
+    }
+    const clientId = new mongoose.Types.ObjectId(response.id);
     let query = {
       status: "approved",
+      clientId,
     };
     if (filter === "awaiting_milestones") {
       query.projectPhase = "milestoneSetup";
@@ -25,6 +31,8 @@ export async function getHiredProjects(filter) {
       query.projectPhase = "completed";
     } else if (filter === "active") {
       query.projectPhase = "active";
+    } else if (filter === "hiredAwaitingEscrowFulfillment") {
+      query.projectPhase = "hiredAwaitingEscrowFulfillment";
     }
 
     const projects = await ProjectPost.find(query)

@@ -55,7 +55,22 @@ export async function adminTransactionCreation({
       clientNextUrl: result.buyerNextUrl,
       contractorNextUrl: result.sellerNextUrl,
     });
+    if (!newEscrow && !newEscrow._id) {
+      return {
+        success: false,
+        message: "Failed to build escrow transaction",
+      };
+    }
 
+     await Promise.allSettled([
+      ProjectPost.findByIdAndUpdate(formattedProjectId, {
+        projectPhase: "hiredAwaitingEscrowFulfillment",
+        escrowId: newEscrow._id,
+      }),
+      Proposal.findByIdAndUpdate(proposalId, {
+        escrowId: newEscrow._id,
+      }),
+    ]);
     revalidatePath("/admin/pendingEscrow");
 
     return {
