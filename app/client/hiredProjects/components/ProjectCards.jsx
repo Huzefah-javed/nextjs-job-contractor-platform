@@ -3,10 +3,12 @@
 import React, { useState } from "react";
 import ClientMilestoneReviewModal from "./ClientMilestoneReviewModal";
 import MilestoneReviewModal from "./MilestoneReviewModal";
+import EscrowStatusModal from "@/app/components/escrowModal";
 
 export default function ProjectCard({ project, activeTab, onReview }) {
   const [showUpdateMilestones, setShowUpdateMilestones] = useState({});
   const [showMilestones, setShowMilestones] = useState(false);
+  const [showEscrowModalwithId, setShowEscrowModalwithId] = useState(null);
 
   const title = project.projectTitle || "Untitled Project";
   const description = project.projectDescription || "No description provided.";
@@ -68,7 +70,6 @@ export default function ProjectCard({ project, activeTab, onReview }) {
           View Details
         </button>
 
-        {/* Dynamic Secondary Button based on Tab state */}
         {activeTab === "active" && (
           <button
             onClick={() =>
@@ -89,6 +90,14 @@ export default function ProjectCard({ project, activeTab, onReview }) {
             className="bg-[#16A34A] hover:bg-green-700 text-white px-6 py-2.5 rounded-full font-medium text-sm transition-colors cursor-pointer shadow-sm"
           >
             Accept Milestones
+          </button>
+        )}
+        {activeTab === "hiredAwaitingEscrowFulfillment" && (
+          <button
+            className="bg-[#16A34A] hover:bg-green-700 text-white px-6 py-2.5 rounded-full font-medium text-sm transition-colors cursor-pointer shadow-sm"
+            onClick={() => setShowEscrowModalwithId(project._id)}
+          >
+            Escrow status
           </button>
         )}
       </div>
@@ -117,6 +126,10 @@ export default function ProjectCard({ project, activeTab, onReview }) {
             })
           }
         />
+      )}
+
+      {showEscrowModalwithId && (
+        <EscrowStatusModal projectId={showEscrowModalwithId} />
       )}
     </div>
   );

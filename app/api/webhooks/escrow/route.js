@@ -11,41 +11,41 @@ export async function POST(req) {
     await dbConnect();
 
     const { event, transaction_id } = body;
+    console.log(body);
+    // switch (event) {
+    //   case "agree":
+    //     await Proposal.updateOne(
+    //       { transactionId: transaction_id },
+    //       { status: "accepted", escrowStatus: "accepted" },
+    //     );
+    //     break;
+    //   case "payment_sent":
+    //     await ProjectPost.updateOne(
+    //       { transactionId: transaction_id },
+    //       { escrowStatus: "payment_sent" },
+    //     );
+    //     break;
+    //   case "payment_approved":
+    //     ProjectPost.updateOne(
+    //       { transactionId: transaction_id },
+    //       { projectPhase: "inProgress", escrowStatus: "payment_approved" },
+    //     );
+    //     break;
 
-    switch (event) {
-      case "agree":
-        await Proposal.updateOne(
-          { transactionId: transaction_id },
-          { status: "accepted", escrowStatus: "accepted" },
-        );
-        break;
-      case "payment_sent":
-        await ProjectPost.updateOne(
-          { transactionId: transaction_id },
-          { escrowStatus: "payment_sent" },
-        );
-        break;
-      case "payment_approved":
-        ProjectPost.updateOne(
-          { transactionId: transaction_id },
-          { projectPhase: "inProgress", escrowStatus: "payment_approved" },
-        );
-        break;
+    //   case "released":
+    //     await ProjectPost.findOneAndUpdate(
+    //       { transactionId: transaction_id },
+    //       { escrowStatus: "released", status: "completed" },
+    //     );
+    //     break;
 
-      case "released":
-        await ProjectPost.findOneAndUpdate(
-          { transactionId: transaction_id },
-          { escrowStatus: "released", status: "completed" },
-        );
-        break;
-
-      case "cancelled":
-        await ProjectPost.findOneAndUpdate(
-          { transactionId: transaction_id },
-          { escrowStatus: "cancelled" },
-        );
-        break;
-    }
+    //   case "cancelled":
+    //     await ProjectPost.findOneAndUpdate(
+    //       { transactionId: transaction_id },
+    //       { escrowStatus: "cancelled" },
+    //     );
+    //     break;
+    // }
 
     return NextResponse.json({ received: true }, { status: 200 });
   } catch (err) {

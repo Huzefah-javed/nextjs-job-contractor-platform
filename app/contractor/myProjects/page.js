@@ -165,7 +165,8 @@ export default function MyProjectsPage() {
                 </div>
 
                 {/* Middle Section: Progress Bar (Only visible if milestones exist) */}
-                {totalCount > 0 && (
+                {(project.projectPhase === "active" ||
+                  project.projectPhase === "completed") && (
                   <div className="w-full">
                     <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2.5">
                       {progressLabel}
@@ -215,6 +216,12 @@ export default function MyProjectsPage() {
                       Setup Milestone
                     </button>
                   )}
+                  {project.projectPhase ===
+                    "hiredAwaitingEscrowFulfillment" && (
+                    <button className="bg-[#16A34A] hover:bg-green-700 text-white px-6 py-2.5 rounded-full font-medium text-sm transition-colors cursor-pointer shadow-sm">
+                      Escrow status
+                    </button>
+                  )}
 
                   {project.projectPhase === "completed" && (
                     <button className="bg-gray-100 text-gray-400 px-6 py-2.5 rounded-full font-medium text-sm cursor-not-allowed">
@@ -228,7 +235,6 @@ export default function MyProjectsPage() {
         </div>
       )}
 
-      {/* Modal Handling */}
       {Object.keys(projectMilestoneModalData).length > 0 && (
         <SetupMilestoneModal
           onClose={() => setProjectMilestoneModalData({})}

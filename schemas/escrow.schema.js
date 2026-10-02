@@ -2,23 +2,23 @@ import mongoose from "mongoose";
 
 const escrowSchema = new mongoose.Schema(
   {
-    projectEscrowStatus: {
+    clientEscrowStatus: {
       type: String,
       enum: [
-        "not_initiated",
-        "pending",
+        "termsPending",
+        "termsAccepted",
         "payment_sent",
         "payment_approved",
         "released",
         "refunded",
         "cancelled",
       ],
-      default: "not_initiated",
+      default: "termsPending",
     },
     proposalEscrowStatus: {
       type: String,
-      enum: ["not_initiated", "termsPending", "accepted"],
-      default: "not_initiated",
+      enum: ["termsPending", "termsAccepted"],
+      default: "termsPending",
     },
     proposalId: {
       type: mongoose.Schema.Types.ObjectId,
