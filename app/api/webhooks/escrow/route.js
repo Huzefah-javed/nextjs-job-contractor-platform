@@ -12,16 +12,13 @@ export async function POST(req) {
     const { event, transaction_id } = body;
     console.log(body);
     switch (event) {
-      case "party_verification_submitted":
-        await Escrow.updateOne(
-          { transactionId: transaction_id },
-          { clientEscrowStatus: "termsAccepted" },
-        );
-        break;
       case "agree":
         await Escrow.updateOne(
           { transactionId: transaction_id },
-          { proposalEscrowStatus: "termsAccepted" },
+          {
+            proposalEscrowStatus: "termsAccepted",
+            clientEscrowStatus: "termsAccepted",
+          },
         );
         break;
       case "payment_sent":
