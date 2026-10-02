@@ -20,7 +20,7 @@ export default function EscrowStatusModal({ projectId, onClose }) {
     fetch();
   }, []);
 
-  const isClientAgreed = escrowData?.clientEscrowStatus === "termsAccepted";
+  const isClientAgreed = escrowData?.clientEscrowStatus !== "termsPending";
   const isContractorAgreed =
     escrowData?.proposalEscrowStatus === "termsAccepted";
   const isPaymentSent = escrowData?.clientEscrowStatus === "payment_sent";
@@ -54,7 +54,7 @@ export default function EscrowStatusModal({ projectId, onClose }) {
       label: "Client Payment Sent (Funded)",
       isCompleted: isPaymentSent,
       actionText: "Fund Escrow (Client)",
-      url: escrowData?.clientNextUrl,
+      url: `https://www.escrow-sandbox.com/transactions/${escrowData?.transactionId}/payment`,
     },
     {
       label: "Client Payment Approved",

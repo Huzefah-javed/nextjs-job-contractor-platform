@@ -10,7 +10,8 @@ export async function projectEscrowDetails(projectId) {
     const res = await authAndGetUser();
     if (!res.success) return { success: false };
 
-    let selectedFields = "projectEscrowStatus proposalEscrowStatus";
+    let selectedFields =
+      "clientEscrowStatus proposalEscrowStatus transactionId";
     if (res.role === "client") selectedFields += " clientNextUrl";
     if (res.role === "contractor") selectedFields += " contractorNextUrl";
 
