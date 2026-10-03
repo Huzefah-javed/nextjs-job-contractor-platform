@@ -1,5 +1,6 @@
 import { dbConnect } from "@/config/db.config";
 import { Escrow } from "@/schemas/escrow.schema";
+import { ProjectPost } from "@/schemas/project.schema";
 import mongoose from "mongoose";
 import { NextResponse } from "next/server";
 
@@ -28,10 +29,14 @@ export async function POST(req) {
         );
         break;
       case "payment_approved":
-        Escrow.updateOne(
+        const { projectId } = await Escrow.findOneAndUpdate(
           { transactionId: transaction_id },
           { clientEscrowStatus: "payment_approved" },
         );
+        await ProjectPost.findByIdAndUpdate(projectId, {
+          projectPhase: "active",
+          projectActiveAt: new Date(),
+        });
         break;
 
       // case "released":
