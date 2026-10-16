@@ -5,38 +5,34 @@ import ProposalDetailModal from "./ProposalDetailModal";
 import { updateProposalStatusAction } from "@/serverActions/proposalAction";
 import LoadingSpinner from "@/app/loading";
 import { useRouter } from "next/navigation";
+import { chatRoomCreationAction } from "@/serverActions/chatRoomAction";
+import { contractorSignupSchema } from "@/validations/contractor.signup.validation";
 
 export default function ProposalListInteractive({ initialProposals, jobId }) {
   const [proposals, setProposals] = useState(initialProposals);
   const [selectedProposal, setSelectedProposal] = useState(null);
-  const [isPending, startTransition] = useTransition();
+  const [isPending, setIsPending] = useState(false);
+
+  const router = useRouter();
 
   useEffect(() => {
     setProposals(initialProposals);
   }, [initialProposals]);
 
-  const router = useRouter();
+  const handleChatCreation = async (contractorId) => {
+    try {
+      setIsPending(true);
+      const res = await chatRoomCreationAction({ contractorId, jobId });
+      setIsPending(false);
 
-  const handleStatusChange = (proposal, newStatus) => {
-    startTransition(async () => {
-      try {
-        const res = await updateProposalStatusAction({
-          proposalId: proposal.id || proposal._id,
-          contractorId: proposal.contractorId,
-          rejectionReason: proposal.rejectionReason || "",
-          status: newStatus,
-          jobId,
-        });
-
-        if (res?.success) {
-          // notify user about success
-        } else {
-          console.log(res);
-        }
-      } catch (err) {
-        console.log(err);
+      if (res?.success) {
+        router.push(`/client/chats?chatId=${res.chatId}`);
+      } else {
+        console.log(res);
       }
-    });
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   if (proposals.length === 0) {
@@ -120,6 +116,15 @@ export default function ProposalListInteractive({ initialProposals, jobId }) {
                         >
                           View
                         </button>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            handleChatCreation(proposal.contractorId)
+                          }
+                          className="px-3 py-1.5 rounded-lg border bg-green-600 border-green-200 text-white font-semibold hover:bg-green-800 transition-all text-xs"
+                        >
+                          Discuss & Hire
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -135,7 +140,6 @@ export default function ProposalListInteractive({ initialProposals, jobId }) {
         jobId={jobId}
         isOpen={!!selectedProposal}
         onClose={() => setSelectedProposal(null)}
-        statusUpdated={handleStatusChange}
       />
     </div>
   );

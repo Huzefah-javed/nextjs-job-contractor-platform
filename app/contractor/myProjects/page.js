@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { getContractorProjectsAction } from "@/serverActions/getContractorProjectsAction";
-import SetupMilestoneModal from "./components/milestoneSetup";
+import SetupMilestoneModal from "../../components/milestoneSetup";
 import { Info } from "lucide-react";
 import MilestoneUpdateModal from "./components/milestoneUpdate";
 
@@ -51,8 +51,6 @@ export default function MyProjectsPage() {
 
     fetchProjects();
   }, [currentFilter]);
-
-  console.log(projects);
 
   const handleUpdateProgress = (projectId) => {
     console.log("Opening progress update modal for:", projectId);
@@ -233,16 +231,7 @@ export default function MyProjectsPage() {
             );
           })}
         </div>
-      )}
-
-      {Object.keys(projectMilestoneModalData).length > 0 && (
-        <SetupMilestoneModal
-          onClose={() => setProjectMilestoneModalData({})}
-          projectId={projectMilestoneModalData.projectId}
-          proposalPrice={projectMilestoneModalData.proposalPrice}
-          projectDuration={projectMilestoneModalData.projectDuration}
-        />
-      )}
+      )} 
 
       {Object.keys(updateOption).length > 0 && (
         <MilestoneUpdateModal

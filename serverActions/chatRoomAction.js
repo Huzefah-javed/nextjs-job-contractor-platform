@@ -26,8 +26,8 @@ export const chatRoomCreationAction = async (chatInfoObj) => {
   const roomId = `${jobId}-${clientId}-${contractorId}`;
 
   try {
-    await ChatRoom.create({ roomId, clientId, contractorId });
-    return {success: true}
+   const data = await ChatRoom.create({ roomId, clientId, contractorId });
+    return {success: true, chatId: data._id}
   } catch (error) {
     console.log(error)
     return {success: false}

@@ -41,11 +41,11 @@ export const gettingChatsForClients = async () => {
           preserveNullAndEmptyArrays: true,
         },
       },
-      { $unwind: "$chats.lastMsg" },
+      { $unwind: { path: "$chats.lastMsg", preserveNullAndEmptyArrays: true } },
       {
         $unwind: {
           path: "$chats.unreadMsgCount",
-           preserveNullAndEmptyArrays: true,
+          preserveNullAndEmptyArrays: true,
         },
       },
       {

@@ -1,15 +1,19 @@
 "use client";
 
+import SetupMilestoneModal from "@/app/components/milestoneSetup";
 import socket from "@/config/socket.config";
 import { readMsgAction } from "@/serverActions/clientSideChatActions";
 import {
   MessageAction,
   MessageLoadAction,
 } from "@/serverActions/messagesAction";
+import { PlusCircle, Send } from "lucide-react";
 import React, { useEffect, useState } from "react";
 
 export default function ChatWindow({ active, setMessages, messages }) {
   const [inputText, setInputText] = useState("");
+  const [projectMilestoneModalStatus, setProjectMilestoneModalStatus] =
+    useState(false);
 
   useEffect(() => {
     async function fetchMsgs() {
@@ -19,8 +23,6 @@ export default function ChatWindow({ active, setMessages, messages }) {
     fetchMsgs();
     return () => readMsgAction(active.chatId, active.clientId);
   }, [active]);
-
-  console.log(messages);
 
   const handleSend = async (e) => {
     e.preventDefault();
@@ -90,42 +92,42 @@ export default function ChatWindow({ active, setMessages, messages }) {
           })}
       </div>
 
-      <form onSubmit={handleSend} className="flex items-center gap-3 pt-2">
+      <form onSubmit={handleSend} className="flex items-center gap-2 pt-2">
+        <button
+          type="button"
+          className="flex items-center gap-1.5 px-4 py-3.5 bg-green-50 hover:bg-green-100 text-[#16A34A] border border-green-200/80 rounded-2xl text-xs font-bold transition-all shadow-2xs shrink-0 cursor-pointer"
+          title="Create a Custom Offer"
+          onClick={() => setProjectMilestoneModalStatus(true)}
+        >
+          <PlusCircle size={16} />
+          <span className="hidden sm:inline">Create Offer</span>
+        </button>
+
         <div className="flex-1 relative flex items-center">
           <input
             type="text"
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
             placeholder="Type your message..."
-            className="w-full py-3.5 pl-5 pr-12 text-xs bg-white border border-slate-200 rounded-2xl focus:outline-none focus:border-slate-300 text-slate-700 placeholder:text-slate-400 shadow-xs"
+            className="w-full py-3.5 pl-5 pr-12 text-xs bg-white border border-slate-200 rounded-2xl focus:outline-none focus:border-slate-300 text-slate-700 placeholder:text-slate-400 shadow-2xs"
           />
-          <button
-            type="button"
-            className="absolute right-4 text-slate-300 hover:text-slate-500 transition-colors"
-          >
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1.5}
-                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-              />
-            </svg>
-          </button>
         </div>
 
         <button
           type="submit"
-          className="px-6 py-3.5 bg-[#11b017] hover:bg-[#0ea013] text-white rounded-2xl text-xs font-bold transition-all shadow-sm"
+          className="px-6 py-3.5 bg-[#16A34A] hover:bg-green-700 text-white rounded-2xl text-xs font-bold transition-all shadow-2xs flex items-center gap-2 cursor-pointer shrink-0"
         >
-          Send
+          <span>Send</span>
+          <Send size={14} className="hidden sm:inline" />
         </button>
       </form>
+
+      {projectMilestoneModalStatus && active && active?.roomId && (
+        <SetupMilestoneModal
+          onClose={() => setProjectMilestoneModalStatus(false)}
+          projectId={active.roomId.split("-")[0]}
+        />
+      )}
     </div>
   );
 }

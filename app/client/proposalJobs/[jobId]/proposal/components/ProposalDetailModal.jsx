@@ -197,36 +197,6 @@ export default function ProposalDetailModal({
             </div>
           )}
 
-          {showRejectInput && (
-            <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3">
-              <label className="block text-xs font-bold text-slate-700">
-                Reason for Rejection (Optional)
-              </label>
-              <textarea
-                rows={3}
-                placeholder="Provide feedback or reasons for declining this proposal..."
-                value={rejectionReason}
-                onChange={(e) => setRejectionReason(e.target.value)}
-                className="w-full p-3 rounded-lg border border-slate-300 text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-slate-400 bg-white"
-              />
-              <div className="flex justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={() => setShowRejectInput(false)}
-                  className="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-600 hover:bg-slate-200 transition-all"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleStatusChange("rejected")}
-                  className="px-4 py-1.5 rounded-lg text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white transition-all shadow-sm"
-                >
-                  Confirm Rejection
-                </button>
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Modal Action Footer */}
@@ -238,49 +208,6 @@ export default function ProposalDetailModal({
           >
             Close
           </button>
-
-          {!showRejectInput && (
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={handleChat}
-                className="px-4 py-2 rounded-lg text-xs font-bold bg-slate-900 hover:bg-slate-800 text-white transition-all shadow-sm flex items-center gap-1.5"
-              >
-                <svg
-                  className="w-3.5 h-3.5"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-                  />
-                </svg>
-                <span>Chat with Contractor</span>
-              </button>
-
-              <button
-                type="button"
-                disabled={isRejected}
-                onClick={() => setShowRejectInput(true)}
-                className="px-4 py-2 rounded-lg text-xs font-bold border border-slate-300 text-slate-700 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 disabled:opacity-40 transition-all"
-              >
-                Reject Proposal
-              </button>
-
-              <button
-                type="button"
-                disabled={isApproved}
-                onClick={() => handleStatusChange("accepted")}
-                className="px-4 py-2 rounded-lg text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white disabled:opacity-40 transition-all shadow-sm"
-              >
-                Approve Proposal
-              </button>
-            </div>
-          )}
         </div>
       </div>
     </div>

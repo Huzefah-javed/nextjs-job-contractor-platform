@@ -6,11 +6,15 @@ import ChatWindow from "./components/chatWindow";
 import ChatSidebar from "./components/chatSider";
 import { gettingChatsForClients } from "@/serverActions/clientSideChatActions";
 import { authAndGetUser } from "@/helpers/authAndGetUser";
+import { useSearchParams } from "next/navigation";
 
 export default function MessagesPage() {
   const [conversations, setConversations] = useState([]);
   const [active, setActive] = useState({});
   const [messages, setMessages] = useState([]);
+
+  const params = useSearchParams();
+  const chaIdQuery = params.get("chatId");
 
   useEffect(() => {
     async function joinRooms() {
@@ -28,7 +32,6 @@ export default function MessagesPage() {
     if (socket.connected) joinRooms();
     return () => socket.off("connect");
   }, []);
-  console.log("conversation: A ", conversations);
 
   useEffect(() => {
     socket.on("receiveMsg", async (data) => {
@@ -56,7 +59,7 @@ export default function MessagesPage() {
       console.log(result);
       if (result.success) {
         const convos = result.response.map((convo) => {
-          return {
+          let obj = {
             chatId: convo.chatId,
             roomId: convo.roomId,
             clientId: convo.clientId,
@@ -65,6 +68,8 @@ export default function MessagesPage() {
             lastMessage: convo.lastMessage,
             unreadMessageCount: convo?.unreadMessageCount || 0,
           };
+          if (chaIdQuery && chaIdQuery === obj.chatId) setActive(obj);
+          return obj;
         });
 
         setConversations(convos);
