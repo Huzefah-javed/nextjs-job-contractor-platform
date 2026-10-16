@@ -11,7 +11,6 @@ export default function SetupMilestoneModal({ onClose, projectId }) {
       title: "",
       amount: "",
       weeks: "",
-      description: "",
     },
   ]);
 
@@ -33,7 +32,6 @@ export default function SetupMilestoneModal({ onClose, projectId }) {
         title: "",
         amount: "",
         weeks: "",
-        description: "",
       },
     ]);
   };
@@ -54,8 +52,7 @@ export default function SetupMilestoneModal({ onClose, projectId }) {
       (m) =>
         m.title.trim() !== "" &&
         parseFloat(m.amount) > 0 &&
-        parseFloat(m.weeks) > 0 &&
-        m.description.trim() !== "",
+        parseFloat(m.weeks) > 0,
     );
 
   const handleSubmit = async (e) => {
@@ -162,7 +159,7 @@ export default function SetupMilestoneModal({ onClose, projectId }) {
                 )}
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div className="md:col-span-2">
                   <label className="block text-xs font-semibold text-gray-700 mb-1.5">
                     Milestone Title
@@ -219,22 +216,6 @@ export default function SetupMilestoneModal({ onClose, projectId }) {
                     required
                   />
                 </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-gray-700 mb-1.5">
-                  Description
-                </label>
-                <textarea
-                  placeholder="Describe deliverables and expectations for this milestone..."
-                  rows="2"
-                  value={milestone.description}
-                  onChange={(e) =>
-                    handleChange(milestone.id, "description", e.target.value)
-                  }
-                  className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-[#16A34A] focus:border-[#16A34A] outline-none resize-none"
-                  required
-                />
               </div>
             </div>
           ))}
