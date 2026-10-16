@@ -3,14 +3,24 @@
 import React, { useState } from "react";
 import { X, Plus, Trash2, DollarSign, Layers } from "lucide-react";
 import { setupProjectMilestones } from "@/serverActions/setupProjectMilestones";
+import { MessageAction } from "@/serverActions/messagesAction";
+import socket from "@/config/socket.config";
 
-export default function SetupMilestoneModal({ onClose, projectId }) {
+export default function SetupMilestoneModal({
+  onClose,
+  roomId,
+  setMessages,
+  offerMadeBy,
+  chatId,
+  clientId,
+  contractorId,
+}) {
   const [milestones, setMilestones] = useState([
     {
       id: crypto.randomUUID(),
       title: "",
       amount: "",
-      weeks: "",
+      deadline: "",
     },
   ]);
 
@@ -20,7 +30,7 @@ export default function SetupMilestoneModal({ onClose, projectId }) {
   );
 
   const totalWeeks = milestones.reduce(
-    (sum, m) => sum + (parseFloat(m.weeks) || 0),
+    (sum, m) => sum + (parseFloat(m.deadline) || 0),
     0,
   );
 
@@ -31,7 +41,7 @@ export default function SetupMilestoneModal({ onClose, projectId }) {
         id: crypto.randomUUID(),
         title: "",
         amount: "",
-        weeks: "",
+        deadline: "",
       },
     ]);
   };
@@ -52,28 +62,32 @@ export default function SetupMilestoneModal({ onClose, projectId }) {
       (m) =>
         m.title.trim() !== "" &&
         parseFloat(m.amount) > 0 &&
-        parseFloat(m.weeks) > 0,
+        parseFloat(m.deadline) > 0,
     );
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!isFormValid) return;
-
     const cleanMilestonesForDb = milestones.map(({ id, ...rest }) => ({
       ...rest,
       amount: parseFloat(rest.amount),
       weeks: parseFloat(rest.weeks),
     }));
 
-    const payload = {
-      totalAmount,
-      totalWeeks,
-      milestones: cleanMilestonesForDb,
-    };
-
-    const res = await setupProjectMilestones(projectId, payload);
-    console.log(res);
-    if (onClose) onClose();
+    socket.emit("sendMsg", {
+      roomId,
+      offerMessage: cleanMilestonesForDb,
+      senderId: offerMadeBy === "client" ? clientId : contractorId,
+    });
+    setMessages((prev) => [
+      ...prev,
+      {
+        roomId,
+        offerMessage: cleanMilestonesForDb,
+        senderId: offerMadeBy === "client" ? clientId : contractorId,
+      },
+    ]);
+    await MessageAction(chatId, cleanMilestonesForDb, "offerMessage");
+    onClose();
   };
 
   return (
@@ -208,9 +222,9 @@ export default function SetupMilestoneModal({ onClose, projectId }) {
                     placeholder="0"
                     min="0.5"
                     step="0.5"
-                    value={milestone.weeks}
+                    value={milestone.deadline}
                     onChange={(e) =>
-                      handleChange(milestone.id, "weeks", e.target.value)
+                      handleChange(milestone.id, "deadline", e.target.value)
                     }
                     className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-[#16A34A] focus:border-[#16A34A] outline-none"
                     required

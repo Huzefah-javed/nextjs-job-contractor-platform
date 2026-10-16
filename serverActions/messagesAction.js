@@ -4,14 +4,27 @@ import { dbConnect } from "@/config/db.config";
 import { authAndGetUser } from "@/helpers/authAndGetUser";
 import Message from "@/schemas/message.schema";
 
-export const MessageAction = async (chatId, message) => {
+export const MessageAction = async (
+  chatId,
+  message,
+  messageType = "message",
+) => {
   const res = await authAndGetUser();
   if (!res.success) return { success: false };
   const senderId = res.id;
 
   try {
     await dbConnect();
-    await Message.create({ chatId, message, senderId });
+    if (messageType === "offerMessage") {
+      await Message.create({
+        chatId,
+        offerMessage: message,
+        senderId,
+        messageType: "offer",
+      });
+    } else if (messageType === "message") {
+      await Message.create({ chatId, message, senderId });
+    }
     return { success: true };
   } catch (error) {
     console.log(error);

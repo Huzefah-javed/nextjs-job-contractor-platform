@@ -89,11 +89,6 @@ const projectPostSchema = new mongoose.Schema(
           type: String,
           required: true,
         },
-        status: {
-          type: String,
-          enum: ["pending", "submitted", "approved", "released", "disputed"],
-          default: "pending",
-        },
       },
     ],
     projectPhase: {

@@ -125,7 +125,11 @@ export default function ChatWindow({ active, setMessages, messages }) {
       {projectMilestoneModalStatus && active && active?.roomId && (
         <SetupMilestoneModal
           onClose={() => setProjectMilestoneModalStatus(false)}
-          projectId={active.roomId.split("-")[0]}
+          roomId={active.roomId}
+          clientId={active.clientId}
+          chatId={active.chatId}
+          setMessages={setMessages}
+          offerMadeBy={"client"}
         />
       )}
     </div>

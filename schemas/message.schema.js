@@ -13,15 +13,35 @@ const messageSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+    messageType: {
+      type: String,
+      enum: ["message", "offer"],
+      default: "message",
+    },
+    offerMessage: [
+      {
+        title: {
+          type: String,
+          required: true,
+        },
+        amount: {
+          type: Number,
+          required: true,
+        },
+        deadline: {
+          type: String,
+          required: true,
+        },
+      },
+    ],
     message: {
       type: String,
-      required: true,
       trim: true,
     },
-    read:{
-      type:Boolean,
-      default: false
-    }
+    read: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,
