@@ -18,7 +18,7 @@ export const chatRoomCreationAction = async (chatInfoObj) => {
 
   if (!isValidJob || !isValidContractor || !isValidClient) {
     return {
-        success: false,
+      success: false,
       isValid: false,
       error: "Invalid or missing ObjectId(s) provided.",
     };
@@ -26,10 +26,10 @@ export const chatRoomCreationAction = async (chatInfoObj) => {
   const roomId = `${jobId}-${clientId}-${contractorId}`;
 
   try {
-   const data = await ChatRoom.create({ roomId, clientId, contractorId });
-    return {success: true, chatId: data._id}
+    const data = await ChatRoom.create({ roomId, clientId, contractorId,  jobId});
+    return { success: true, chatId: data._id };
   } catch (error) {
-    console.log(error)
-    return {success: false}
+    console.log(error);
+    return { success: false };
   }
 };

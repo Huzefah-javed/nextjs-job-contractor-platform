@@ -39,9 +39,32 @@ export const MessageLoadAction = async (chatId) => {
   try {
     await dbConnect();
     const response = await Message.find({ chatId });
-    return { success: true, response };
+    console.log("response: ", response);
+    return { success: true, response: JSON.parse(JSON.stringify(response)) };
   } catch (error) {
     console.log(error);
     return { success: false };
+  }
+};
+
+export const MessageOfferDeclineAction = async (msgId, senderId) => {
+  if (!msgId) return false;
+
+  const res = await authAndGetUser();
+  if (!res.success) return false;
+  if (res.id === senderId)
+    return { success: false, message: "you are unable to perform this action" };
+
+  try {
+    await dbConnect();
+    const updatedMessage = await Message.findByIdAndUpdate(msgId, {
+      offerStatus: "decline",
+    });
+
+    if (!updatedMessage) return false;
+    return { success: true };
+  } catch (error) {
+    console.log(error);
+    return false;
   }
 };

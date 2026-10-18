@@ -70,7 +70,7 @@ export const gettingChatsForClients = async () => {
       },
     ]);
 
-    return { success: true, response };
+    return { success: true, response: JSON.parse(JSON.stringify(response)) };
   } catch (error) {
     console.log(error);
     return { success: false, error: error };

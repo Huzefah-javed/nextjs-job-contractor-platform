@@ -18,6 +18,11 @@ const chatRoomSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+    jobId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "ProjectPost",
+      required: true,
+    },
   },
   {
     timestamps: true,

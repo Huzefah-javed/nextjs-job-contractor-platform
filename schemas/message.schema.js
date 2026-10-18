@@ -34,6 +34,11 @@ const messageSchema = new mongoose.Schema(
         },
       },
     ],
+    offerStatus: {
+      type: String,
+      enum: ["decline", "accepted"],
+      default: undefined,
+    },
     message: {
       type: String,
       trim: true,
