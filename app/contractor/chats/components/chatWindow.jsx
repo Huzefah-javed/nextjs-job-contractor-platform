@@ -2,10 +2,12 @@
 
 import SetupMilestoneModal from "@/app/components/milestoneSetup";
 import socket from "@/config/socket.config";
+import { transactionCreationAction } from "@/serverActions/adminTransactionCreation";
 import { readMsgAction } from "@/serverActions/clientSideChatActions";
 import {
   MessageAction,
   MessageLoadAction,
+  MessageOfferDeclineAction,
 } from "@/serverActions/messagesAction";
 import { PlusCircle, Send } from "lucide-react";
 import React, { useEffect, useState } from "react";
@@ -46,6 +48,30 @@ export default function ChatWindow({ active, setMessages, messages }) {
 
     setInputText("");
   };
+
+  
+    const handleDeclineOffer = async (msgId, senderId) => {
+      const response = await MessageOfferDeclineAction(msgId, senderId);
+      if (response.success) {
+      } else {
+        console.log(response.message || "failed to decline");
+      }
+    };
+
+   const handleAcceptOffer = async (milestones) => {
+      try {
+        const response = await transactionCreationAction({
+          milestones,
+          clientId: active.clientId,
+          contractorId: active.contractorId,
+          projectId: active.jobId,
+          selectedProposalId: active.proposalId,
+        });
+        console.log(response);
+      } catch (error) {
+        console.log(error);
+      }
+    };
 
   if (!active) return null;
   return (
@@ -134,8 +160,7 @@ export default function ChatWindow({ active, setMessages, messages }) {
                           </button>
                           <button
                             type="button"
-                            onClick={() =>
-                              handleAcceptOffer && handleAcceptOffer(msg._id)
+                            onClick={() => handleAcceptOffer(msg.offerMessage)
                             }
                             className="px-4 py-2 bg-[#11b017] hover:bg-[#0ea013] text-white rounded-xl text-xs font-bold transition-all shadow-2xs cursor-pointer"
                           >

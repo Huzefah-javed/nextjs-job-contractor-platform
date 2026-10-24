@@ -57,6 +57,7 @@ export default function SetupMilestoneModal({
   };
 
   const isFormValid =
+    totalAmount >= 50 &&
     milestones.length > 0 &&
     milestones.every(
       (m) =>

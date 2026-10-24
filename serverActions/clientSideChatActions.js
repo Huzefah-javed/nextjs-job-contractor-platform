@@ -62,6 +62,8 @@ export const gettingChatsForClients = async () => {
         $project: {
           contractor: 1,
           clientId: 1,
+          jobId: 1,
+          proposalId: 1,
           roomId: 1,
           chatId: "$_id",
           lastMessage: "$chats.lastMsg.message",

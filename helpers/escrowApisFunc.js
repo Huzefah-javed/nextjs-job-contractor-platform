@@ -3,17 +3,14 @@ import { escrowApi } from "@/config/escrow.config";
 export const createTransaction = async ({
   sellerEmail,
   buyerEmail,
-  jobTitle,
-  jobDescription,
   inspectionPeriod,
   milestones,
 }) => {
-  const itemType = milestones.length > 1 ? "milestone" : "general_merchandise";
 
   const items = milestones.map((milestone) => ({
     title: milestone.title,
-    description: milestone.description || milestone.title,
-    type: itemType,
+    description: milestone.title,
+    type: "milestone",
     inspection_period: inspectionPeriod || 259200 * 5,
     quantity: 1,
     schedule: [
@@ -41,7 +38,10 @@ export const createTransaction = async ({
       },
     ],
     currency: "usd",
-    description: jobTitle.slice(0, 250),
+    description: milestones
+      .map((a) => a.title)
+      .join("-")
+      .slice(0, 250),
     items,
   };
 

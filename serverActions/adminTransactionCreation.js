@@ -10,13 +10,12 @@ import { users } from "@/schemas/user.schema";
 import mongoose from "mongoose";
 import { revalidatePath } from "next/cache";
 
-export async function adminTransactionCreation({
+export async function transactionCreationAction({
   projectId,
-  projectTitle,
   milestones,
   selectedProposalId,
-  clientEmail,
-  contractorEmail,
+  clientId,
+  contractorId,
 }) {
   try {
     const res = await authAndGetUser();
@@ -25,6 +24,12 @@ export async function adminTransactionCreation({
     }
 
     await dbConnect();
+    const [client, contractor] = await Promise.all([
+      users.findById(clientId, "email companyEmail"),
+      users.findById(contractorId, "email companyEmail"),
+    ]);
+    const contractorEmail = contractor?.email || contractor?.companyEmail;
+    const clientEmail = client?.email || client?.companyEmail;
 
     if (!clientEmail || !contractorEmail) {
       return { success: false, message: "Client or contractor email missing" };
@@ -36,9 +41,7 @@ export async function adminTransactionCreation({
     const result = await createTransaction({
       buyerEmail: clientEmail,
       sellerEmail: contractorEmail,
-      jobTitle: projectTitle,
       milestones,
-      jobDescription: projectTitle || "Escrow Contract",
     });
 
     if (!result?.transactionId) {
@@ -62,7 +65,7 @@ export async function adminTransactionCreation({
       };
     }
 
-     await Promise.allSettled([
+    await Promise.allSettled([
       ProjectPost.findByIdAndUpdate(formattedProjectId, {
         projectPhase: "hiredAwaitingEscrowFulfillment",
         escrowId: newEscrow._id,
@@ -79,7 +82,10 @@ export async function adminTransactionCreation({
       transactionId: result.transactionId,
     };
   } catch (error) {
-    console.error("Error in adminTransactionCreation:", error);
+    console.error("Error in adminTransactionCreation:");
+    console.error("Error in adminTransactionCreation:", error.response);
+    // console.error("Error in adminTransactionCreation:", error.message);
+    console.error("Error in adminTransactionCreation2:", error.response.data.errors);
     return {
       success: false,
       message:

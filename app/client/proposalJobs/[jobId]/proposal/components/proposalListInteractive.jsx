@@ -19,10 +19,14 @@ export default function ProposalListInteractive({ initialProposals, jobId }) {
     setProposals(initialProposals);
   }, [initialProposals]);
 
-  const handleChatCreation = async (contractorId) => {
+  const handleChatCreation = async (contractorId, proposalId) => {
     try {
       setIsPending(true);
-      const res = await chatRoomCreationAction({ contractorId, jobId });
+      const res = await chatRoomCreationAction({
+        contractorId,
+        jobId,
+        proposalId,
+      });
       setIsPending(false);
 
       if (res?.success) {
@@ -119,7 +123,10 @@ export default function ProposalListInteractive({ initialProposals, jobId }) {
                         <button
                           type="button"
                           onClick={() =>
-                            handleChatCreation(proposal.contractorId)
+                            handleChatCreation(
+                              proposal.contractorId,
+                              proposal.id,
+                            )
                           }
                           className="px-3 py-1.5 rounded-lg border bg-green-600 border-green-200 text-white font-semibold hover:bg-green-800 transition-all text-xs"
                         >
