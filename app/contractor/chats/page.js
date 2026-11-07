@@ -28,30 +28,78 @@ export default function MessagesPage() {
   }, []);
 
   useEffect(() => {
-    socket.on("receiveMsg", (data) => {
-      console.log("Message received");
-      let convo = conversations.filter(
-        (item) => item.roomId === data.roomId,
-      )[0];
+    socket.on("receiveMsg", async (data) => {
+      const res = await authAndGetUser();
+      if (!res.success) return;
 
-      convo.lastMessage = data.message;
-      const fil = conversations.filter((item) => item.roomId !== data.roomId);
-
-      setConversations([convo, ...fil]);
-
-      if (Object.keys(active).length > 0) {
-        setMessages((prev) => [...prev, data]);
+      if (data.senderId === res.id) {
+        setMessages((prev) =>
+          prev.map((chat) => {
+            if (chat.isSending && chat.isSending === true) {
+              return { ...chat, isSending: false };
+            } else {
+              return chat;
+            }
+          }),
+        );
       } else {
-        convo.unreadMsgCount = convo.unreadMsgCount + 1;
+        console.log("Message received");
+        let convo = conversations.filter(
+          (item) => item.roomId === data.roomId,
+        )[0];
+
+        convo.lastMessage = data.message;
+        const fil = conversations.filter((item) => item.roomId !== data.roomId);
+
+        setConversations([convo, ...fil]);
+
+        if (Object.keys(active).length > 0 && active.roomId === data.roomId) {
+          setMessages((prev) => [...prev, data]);
+        } else {
+          convo.unreadMsgCount = convo.unreadMsgCount + 1;
+        }
       }
     });
     return () => socket.off("receiveMsg");
   }, [active, conversations]);
 
   useEffect(() => {
+    socket.on("onlineUserDetected", (roomId) => {
+      console.log("in there.........");
+      const isThere = conversations.find(
+        (convo) => convo.roomId === roomId && convo.status === "online",
+      );
+      if (!isThere) {
+        setConversations((prev) =>
+          prev.map((convo) =>
+            convo.roomId === roomId ? { ...convo, status: "online" } : convo,
+          ),
+        );
+      }
+      socket.emit("onlineStatusSend", roomId);
+    });
+
+    socket.on("onlineStatusReceive", (roomId) => {
+      const isThere = conversations.find(
+        (convo) => convo.roomId === roomId && convo.status === "online",
+      );
+      if (!isThere) {
+        setConversations((prev) =>
+          prev.map((convo) =>
+            convo.roomId === roomId ? { ...convo, status: "online" } : convo,
+          ),
+        );
+      }
+    });
+  }, []);
+
+  useEffect(() => {
     async function fetchData() {
       const result = await gettingChatsForContractors();
       if (result.success) {
+        const roomIds = result.response.map((convo) => convo.roomId);
+
+        socket.emit("OnlineNotifyToAll", roomIds);
         const convos = result.response.map((convo) => {
           return {
             chatId: convo._id,
@@ -61,6 +109,7 @@ export default function MessagesPage() {
             clientId: convo.client.id,
             lastMessage: convo.lastMessage || "start conversation",
             unreadMsgCount: convo?.unreadMsgCount || 0,
+            status: "offline",
           };
         });
 

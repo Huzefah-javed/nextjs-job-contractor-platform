@@ -45,8 +45,11 @@ export default function ChatSidebar({
               {/* Avatar Container */}
               <div className="relative shrink-0">
                 <div className="w-10 h-10 font-bold text-lg text-slate-700 flex justify-center items-center rounded-full overflow-hidden bg-slate-100 border border-slate-200">
-                  {item?.clientName?.slice(0, 1)?.toUpperCase() || "C"}
+                  {item.clientName?.slice(0, 1)?.toUpperCase() || "C"}
                 </div>
+                {item.status === "online" && (
+                  <span className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 border-2 border-white rounded-full"></span>
+                )}
               </div>
 
               <div className="min-w-0 flex-1">

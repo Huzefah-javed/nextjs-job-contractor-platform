@@ -9,7 +9,7 @@ import {
   MessageLoadAction,
   MessageOfferDeclineAction,
 } from "@/serverActions/messagesAction";
-import { PlusCircle, Send } from "lucide-react";
+import { Check, Loader2, PlusCircle, Send } from "lucide-react";
 import React, { useEffect, useState } from "react";
 
 export default function ChatWindow({ active, setMessages, messages }) {
@@ -32,9 +32,11 @@ export default function ChatWindow({ active, setMessages, messages }) {
     e.preventDefault();
     if (!inputText.trim()) return;
     socket.emit("sendMsg", {
-      roomId: active.roomId || "mf34f",
+      roomId: active.roomId,
+      chatId: active.chatId,
+      messageType: "message",
       message: inputText,
-      senderId: active.contractorId || "mf34f",
+      senderId: active.contractorId,
     });
     setMessages((prev) => [
       ...prev,
@@ -42,36 +44,35 @@ export default function ChatWindow({ active, setMessages, messages }) {
         roomId: active.roomId,
         message: inputText,
         senderId: active.contractorId,
+        isSending: true,
       },
     ]);
-    await MessageAction(active?.chatId, inputText);
 
     setInputText("");
   };
 
-  
-    const handleDeclineOffer = async (msgId, senderId) => {
-      const response = await MessageOfferDeclineAction(msgId, senderId);
-      if (response.success) {
-      } else {
-        console.log(response.message || "failed to decline");
-      }
-    };
+  const handleDeclineOffer = async (msgId, senderId) => {
+    const response = await MessageOfferDeclineAction(msgId, senderId);
+    if (response.success) {
+    } else {
+      console.log(response.message || "failed to decline");
+    }
+  };
 
-   const handleAcceptOffer = async (milestones) => {
-      try {
-        const response = await transactionCreationAction({
-          milestones,
-          clientId: active.clientId,
-          contractorId: active.contractorId,
-          projectId: active.jobId,
-          selectedProposalId: active.proposalId,
-        });
-        console.log(response);
-      } catch (error) {
-        console.log(error);
-      }
-    };
+  const handleAcceptOffer = async (milestones) => {
+    try {
+      const response = await transactionCreationAction({
+        milestones,
+        clientId: active.clientId,
+        contractorId: active.contractorId,
+        projectId: active.jobId,
+        selectedProposalId: active.proposalId,
+      });
+      console.log(response);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   if (!active) return null;
   return (
@@ -143,30 +144,52 @@ export default function ChatWindow({ active, setMessages, messages }) {
                     </div>
 
                     <div className="pt-1 flex items-center justify-between">
-                      <span className="text-[10px] text-slate-400 font-medium">
-                        {msg.timestamp}
-                      </span>
-                      {!isMe && (
-                        <div className="flex items-center gap-2">
-                          <button
-                            type="button"
-                            onClick={() =>
-                              handleDeclineOffer &&
-                              handleDeclineOffer(msg._id, msg.senderId)
-                            }
-                            className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-bold transition-all shadow-2xs cursor-pointer"
-                          >
-                            Decline
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleAcceptOffer(msg.offerMessage)
-                            }
-                            className="px-4 py-2 bg-[#11b017] hover:bg-[#0ea013] text-white rounded-xl text-xs font-bold transition-all shadow-2xs cursor-pointer"
-                          >
-                            Accept & Fund
-                          </button>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[10px] text-slate-400 font-medium">
+                          {msg.timestamp}
+                        </span>
+                        {isMe && (
+                          <span>
+                            {msg.isSending ? (
+                              <Loader2 className="w-3 h-3 text-slate-400 animate-spin" />
+                            ) : (
+                              <Check className="w-3 h-3 text-emerald-600" />
+                            )}
+                          </span>
+                        )}
+                      </div>
+                      {msg.offerStatus === "decline" ? (
+                        <div className="px-3.5 py-1.5 bg-red-50 text-red-600 border border-red-100 rounded-xl text-xs font-bold flex items-center gap-1.5">
+                          <span>Offer Declined</span>
                         </div>
+                      ) : msg.offerStatus === "accepted" ? (
+                        <div className="px-3.5 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-xl text-xs font-bold flex items-center gap-1.5">
+                          <span>Offer Accepted & Funded</span>
+                        </div>
+                      ) : (
+                        !isMe && (
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                handleDeclineOffer &&
+                                handleDeclineOffer(msg._id, msg.senderId)
+                              }
+                              className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-bold transition-all shadow-2xs cursor-pointer"
+                            >
+                              Decline
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                handleAcceptOffer(msg.offerMessage)
+                              }
+                              className="px-4 py-2 bg-[#11b017] hover:bg-[#0ea013] text-white rounded-xl text-xs font-bold transition-all shadow-2xs cursor-pointer"
+                            >
+                              Accept & Fund
+                            </button>
+                          </div>
+                        )
                       )}
                     </div>
                   </div>
@@ -179,15 +202,22 @@ export default function ChatWindow({ active, setMessages, messages }) {
                     }`}
                   >
                     <p>{msg.message}</p>
-                    <span
-                      className={`block text-[10px] mt-2 font-medium ${
-                        isMe
-                          ? "text-emerald-100/80 text-right"
-                          : "text-slate-400"
+                    <div
+                      className={`flex items-center justify-end gap-1.5 text-[10px] mt-2 font-medium ${
+                        isMe ? "text-emerald-100/80" : "text-slate-400"
                       }`}
                     >
-                      {msg.timestamp}
-                    </span>
+                      <span>{msg.timestamp}</span>
+                      {isMe && (
+                        <span>
+                          {msg.isSending ? (
+                            <Loader2 className="w-3 h-3 text-emerald-100 animate-spin" />
+                          ) : (
+                            <Check className="w-3 h-3 text-white" />
+                          )}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 )}
               </div>
