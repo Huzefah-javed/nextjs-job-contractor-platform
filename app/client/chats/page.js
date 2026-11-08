@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import socket from "@/config/socket.config";
 import ChatWindow from "./components/chatWindow";
 import ChatSidebar from "./components/chatSider";
@@ -12,6 +12,11 @@ export default function MessagesPage() {
   const [conversations, setConversations] = useState([]);
   const [active, setActive] = useState({});
   const [messages, setMessages] = useState([]);
+
+  const convoRef = useRef(conversations);
+  useEffect(() => {
+    convoRef.current = conversations;
+  }, [conversations]);
 
   const params = useSearchParams();
   const chaIdQuery = params.get("chatId");
@@ -30,7 +35,11 @@ export default function MessagesPage() {
       joinRooms();
     });
     if (socket.connected) joinRooms();
-    return () => socket.off("connect");
+    return () => {
+      const roomIds = convoRef.current.map((convo) => convo.roomId);
+      socket.emit("OfflineNotifyToAll", roomIds);
+      socket.off("connect");
+    };
   }, []);
 
   useEffect(() => {
@@ -74,6 +83,9 @@ export default function MessagesPage() {
         (convo) => convo.roomId === roomId && convo.status === "online",
       );
       if (!isThere) {
+        if (active.roomId === roomId) {
+          setActive((prev) => ({ ...prev, status: "online" }));
+        }
         setConversations((prev) =>
           prev.map((convo) =>
             convo.roomId === roomId ? { ...convo, status: "online" } : convo,
@@ -88,6 +100,9 @@ export default function MessagesPage() {
         (convo) => convo.roomId === roomId && convo.status === "online",
       );
       if (!isThere) {
+        if (active.roomId === roomId) {
+          setActive((prev) => ({ ...prev, status: "online" }));
+        }
         setConversations((prev) =>
           prev.map((convo) =>
             convo.roomId === roomId ? { ...convo, status: "online" } : convo,
@@ -95,7 +110,22 @@ export default function MessagesPage() {
         );
       }
     });
-  }, []);
+    socket.on("offlineUserDetected", (roomId) => {
+      const isThere = conversations.find(
+        (convo) => convo.roomId === roomId && convo.status === "offline",
+      );
+      if (!isThere) {
+        if (active.roomId === roomId) {
+          setActive((prev) => ({ ...prev, status: "offline" }));
+        }
+        setConversations((prev) =>
+          prev.map((convo) =>
+            convo.roomId === roomId ? { ...convo, status: "offline" } : convo,
+          ),
+        );
+      }
+    });
+  }, [active, active.roomId]);
 
   useEffect(() => {
     async function fetchData() {

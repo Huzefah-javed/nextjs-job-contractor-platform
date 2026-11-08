@@ -26,8 +26,6 @@ export default function ChatWindow({ active, setMessages, messages }) {
     return () => readMsgAction(active.chatId, active.contractorId);
   }, [active]);
 
-  console.log(messages);
-
   const handleSend = async (e) => {
     e.preventDefault();
     if (!inputText.trim()) return;
@@ -86,7 +84,7 @@ export default function ChatWindow({ active, setMessages, messages }) {
             {active?.clientName}
           </h2>
           <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-            {active?.status || "ONLINE"}
+            {active?.status}
           </span>
         </div>
       </div>
@@ -137,7 +135,7 @@ export default function ChatWindow({ active, setMessages, messages }) {
                           </div>
                           <div className="flex justify-between items-center text-[11px] text-slate-500 font-medium">
                             <span>Duration:</span>
-                            <span>{milestone.weeks} Weeks</span>
+                            <span>{milestone.weeks || milestone.deadline} Weeks</span>
                           </div>
                         </div>
                       ))}
@@ -259,7 +257,7 @@ export default function ChatWindow({ active, setMessages, messages }) {
         <SetupMilestoneModal
           onClose={() => setProjectMilestoneModalStatus(false)}
           roomId={active.roomId}
-          clientId={active.clientId}
+          contractorId={active.contractorId}
           chatId={active.chatId}
           setMessages={setMessages}
           offerMadeBy={"contractor"}

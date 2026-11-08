@@ -86,7 +86,7 @@ export default function ChatWindow({ active, setMessages, messages }) {
             {active?.contractorName}
           </h2>
           <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-            {active?.status || "ONLINE"}
+            {active?.status}
           </span>
         </div>
       </div>

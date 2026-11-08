@@ -74,13 +74,6 @@ export default function SetupMilestoneModal({
       weeks: parseFloat(rest.weeks),
     }));
 
-    socket.emit("sendMsg", {
-      chatId,
-      roomId,
-      messageType: "offer",
-      offerMessage: cleanMilestonesForDb,
-      senderId: offerMadeBy === "client" ? clientId : contractorId,
-    });
     setMessages((prev) => [
       ...prev,
       {
@@ -91,6 +84,14 @@ export default function SetupMilestoneModal({
         isSending: true,
       },
     ]);
+    
+    socket.emit("sendMsg", {
+      chatId,
+      roomId,
+      messageType: "offer",
+      offerMessage: cleanMilestonesForDb,
+      senderId: offerMadeBy === "client" ? clientId : contractorId,
+    });
     onClose();
   };
 
