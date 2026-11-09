@@ -15,6 +15,34 @@ const escrowSchema = new mongoose.Schema(
       ],
       default: "termsPending",
     },
+    milestoneReleaseRequired: {
+      type: Boolean,
+      default: false,
+    },
+    milestones: [
+      {
+        title: {
+          type: String,
+          required: true,
+        },
+        escrowMilestoneId: {
+          type: String,
+        },
+        amount: {
+          type: Number,
+          required: true,
+        },
+        status: {
+          type: String,
+          enum: ["underProgress", "pending", "completed"],
+          default: "underProgress",
+        },
+        deadline: {
+          type: String,
+          required: true,
+        },
+      },
+    ],
     proposalEscrowStatus: {
       type: String,
       enum: ["termsPending", "termsAccepted"],

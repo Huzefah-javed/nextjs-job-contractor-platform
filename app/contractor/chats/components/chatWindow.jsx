@@ -127,7 +127,7 @@ export default function ChatWindow({ active, setMessages, messages }) {
                         >
                           <div className="flex justify-between items-center text-xs font-bold text-slate-800">
                             <span>
-                              {idx + 1}. {milestone.title}
+                              {idx + 1}. {milestone.title.split("-")[0]}
                             </span>
                             <span className="text-emerald-600">
                               ${parseFloat(milestone.amount).toLocaleString()}

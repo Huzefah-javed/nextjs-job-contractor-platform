@@ -68,8 +68,9 @@ export default function SetupMilestoneModal({
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const cleanMilestonesForDb = milestones.map(({ id, ...rest }) => ({
+    const cleanMilestonesForDb = milestones.map(({ id, title, ...rest }) => ({
       ...rest,
+      title: `${title}-${id}`,
       amount: parseFloat(rest.amount),
       weeks: parseFloat(rest.weeks),
     }));
@@ -84,7 +85,7 @@ export default function SetupMilestoneModal({
         isSending: true,
       },
     ]);
-    
+
     socket.emit("sendMsg", {
       chatId,
       roomId,

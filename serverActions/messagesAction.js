@@ -68,3 +68,25 @@ export const MessageOfferDeclineAction = async (msgId, senderId) => {
     return false;
   }
 };
+
+export const MessageOfferAcceptAction = async (msgId, senderId) => {
+  if (!msgId) return false;
+
+  const res = await authAndGetUser();
+  if (!res.success) return false;
+  if (res.id === senderId)
+    return { success: false, message: "you are unable to perform this action" };
+
+  try {
+    await dbConnect();
+    const updatedMessage = await Message.findByIdAndUpdate(msgId, {
+      offerStatus: "accepted",
+    });
+
+    if (!updatedMessage) return false;
+    return { success: true };
+  } catch (error) {
+    console.log(error);
+    return false;
+  }
+};

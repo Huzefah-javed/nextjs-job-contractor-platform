@@ -64,53 +64,14 @@ const projectPostSchema = new mongoose.Schema(
       enum: ["approved", "reject", "pending"],
       default: "pending",
     },
-    milestoneApproved: {
-      type: String,
-      enum: ["awaitingApproval", "pending", "approved", "rejected"],
-      default: "awaitingApproval",
-    },
-    milestones: [
-      {
-        title: {
-          type: String,
-          required: true,
-        },
-        escrowMilestoneId: {
-          type: String,
-        },
-        description: {
-          type: String,
-        },
-        amount: {
-          type: Number,
-          required: true,
-        },
-        deadline: {
-          type: String,
-          required: true,
-        },
-      },
-    ],
     projectPhase: {
       type: String,
-      enum: [
-        "acceptingProposals",
-        "milestoneSetup",
-        "pendingEscrowCreation", // for admin approval
-        "hiredAwaitingEscrowFulfillment", // for the hired phase and escrow phase.
-        "active", // project gonna active
-        "completed",
-        "cancelled",
-      ],
+      enum: ["acceptingProposals", "underEscrow", "completed", "cancelled"],
       default: "acceptingProposals",
     },
     selectedProposalId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Proposal",
-      default: null,
-    },
-    projectActiveAt: {
-      type: Date,
       default: null,
     },
     escrowId: {

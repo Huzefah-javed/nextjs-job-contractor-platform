@@ -6,7 +6,6 @@ export const createTransaction = async ({
   inspectionPeriod,
   milestones,
 }) => {
-
   const items = milestones.map((milestone) => ({
     title: milestone.title,
     description: milestone.title,
@@ -53,7 +52,10 @@ export const createTransaction = async ({
       ?.next_step,
     sellerNextUrl: result.data.parties.filter((a) => a.role === "seller")[0]
       ?.next_step,
-    milestoneIds: result.data.items.map((item) => item.id),
+    milestones: result.data.items.map((item) => ({
+      id: item.id,
+      title: item.title,
+    })),
   };
 
   return data;

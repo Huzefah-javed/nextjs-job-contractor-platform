@@ -9,11 +9,13 @@ import { Proposal } from "@/schemas/proposal.schema";
 import { users } from "@/schemas/user.schema";
 import mongoose from "mongoose";
 import { revalidatePath } from "next/cache";
+import { setupProjectMilestones } from "./setupProjectMilestones";
 
 export async function transactionCreationAction({
   projectId,
   milestones,
   selectedProposalId,
+  senderId,
   clientId,
   contractorId,
 }) {
@@ -22,6 +24,11 @@ export async function transactionCreationAction({
     if (!res?.success) {
       return { success: false, message: "Unauthorized access" };
     }
+    if (res.id === senderId)
+      return {
+        success: false,
+        message: "you are unable to perform this action",
+      };
 
     await dbConnect();
     const [client, contractor] = await Promise.all([
@@ -51,12 +58,32 @@ export async function transactionCreationAction({
       };
     }
 
+    let allMatched = true;
+    for (let i = 0; i < milestones.length; i++) {
+      if (
+        result.milestones[i] &&
+        milestones[i].title === result.milestones[i].title
+      ) {
+        milestones[i].escrowMilestoneId = result.milestones[i].id;
+      } else {
+        allMatched = false;
+      }
+    }
+
+    if (!allMatched) {
+      return {
+        success: false,
+        message: "Failed to generate transaction ID for particular milestone",
+      };
+    }
+
     const newEscrow = await Escrow.create({
       proposalId,
       projectId: formattedProjectId,
       transactionId: result.transactionId,
       clientNextUrl: result.buyerNextUrl,
       contractorNextUrl: result.sellerNextUrl,
+      milestones,
     });
     if (!newEscrow && !newEscrow._id) {
       return {
@@ -67,7 +94,7 @@ export async function transactionCreationAction({
 
     await Promise.allSettled([
       ProjectPost.findByIdAndUpdate(formattedProjectId, {
-        projectPhase: "hiredAwaitingEscrowFulfillment",
+        projectPhase: "underEscrow",
         escrowId: newEscrow._id,
       }),
       Proposal.findByIdAndUpdate(proposalId, {
@@ -84,8 +111,10 @@ export async function transactionCreationAction({
   } catch (error) {
     console.error("Error in adminTransactionCreation:");
     console.error("Error in adminTransactionCreation:", error.response);
-    // console.error("Error in adminTransactionCreation:", error.message);
-    console.error("Error in adminTransactionCreation2:", error.response.data.errors);
+     console.error(
+      "Error in adminTransactionCreation2:",
+      error.response.data.errors,
+    );
     return {
       success: false,
       message:
