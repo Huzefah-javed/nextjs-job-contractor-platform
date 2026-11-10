@@ -12,11 +12,10 @@ export default function MessagesPage() {
   const [active, setActive] = useState({});
   const [messages, setMessages] = useState([]);
 
-  const convoRef = useRef(conversations)
+  const convoRef = useRef(conversations);
   useEffect(() => {
-  convoRef.current = conversations;
-}, [conversations]);
-
+    convoRef.current = conversations;
+  }, [conversations]);
 
   useEffect(() => {
     async function joinRooms() {
@@ -134,6 +133,8 @@ export default function MessagesPage() {
           return {
             chatId: convo._id,
             roomId: convo.roomId,
+            jobId: convo.jobId,
+            proposalId: convo.proposalId,
             contractorId: convo.contractorId,
             clientName: convo.client.name,
             clientId: convo.client.id,

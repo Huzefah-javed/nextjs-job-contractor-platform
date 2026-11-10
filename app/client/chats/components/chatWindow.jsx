@@ -171,7 +171,7 @@ export default function ChatWindow({ active, setMessages, messages }) {
                         </div>
                       ) : msg.offerStatus === "accepted" ? (
                         <div className="px-3.5 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-xl text-xs font-bold flex items-center gap-1.5">
-                          <span>Offer Accepted & Funded</span>
+                          <span>Offer Accepted</span>
                         </div>
                       ) : (
                         !isMe && (

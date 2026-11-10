@@ -39,7 +39,6 @@ export const MessageLoadAction = async (chatId) => {
   try {
     await dbConnect();
     const response = await Message.find({ chatId });
-    console.log("response: ", response);
     return { success: true, response: JSON.parse(JSON.stringify(response)) };
   } catch (error) {
     console.log(error);

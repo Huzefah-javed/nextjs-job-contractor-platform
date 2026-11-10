@@ -3,6 +3,7 @@
 import { dbConnect } from "@/config/db.config";
 import { authAndGetUser } from "@/helpers/authAndGetUser";
 import { createTransaction } from "@/helpers/escrowApisFunc";
+import { Escrow } from "@/schemas/escrow.schema";
 import { ProjectPost } from "@/schemas/project.schema";
 import { Proposal } from "@/schemas/proposal.schema";
 import { users } from "@/schemas/user.schema";
@@ -16,35 +17,72 @@ export async function getHiredProjects(filter) {
     if (!response.success) {
       return { success: false, message: "Unauthorized. Please log in." };
     }
-    const clientId = new mongoose.Types.ObjectId(response.id);
-    let query = {
-      status: "approved",
-      clientId,
-    };
-    if (filter === "awaiting_milestones") {
-      query.projectPhase = "milestoneSetup";
-      query.milestoneApproved = { $in: ["awaitingApproval", "rejected"] };
-    } else if (filter === "milestone_ready") {
-      query.projectPhase = "milestoneSetup";
-      query.milestoneApproved = "pending";
-    } else if (filter === "completed") {
-      query.projectPhase = "completed";
-    } else if (filter === "active") {
-      query.projectPhase = "active";
-    } else if (filter === "hiredAwaitingEscrowFulfillment") {
-      query.projectPhase = "hiredAwaitingEscrowFulfillment";
+    const userId = new mongoose.Types.ObjectId(response.id);
+    let query = {};
+    if (filter === "active") {
+      query.clientEscrowStatus = "payment_approved";
+      query.proposalEscrowStatus = "termsAccepted";
+    } else if (filter === "escrowPending") {
+      query.clientEscrowStatus = {
+        $in: ["termsPending", "termsAccepted", "payment_sent"],
+      };
     }
-
-    const projects = await ProjectPost.find(query)
-      .select(
-        "_id projectTitle projectDescription projectCategory projectDuration startDate projectPhase milestoneApproved milestones createdAt updatedAt",
-      )
-      .populate({
-        path: "selectedProposalId",
-        select: "proposedBudget estimatedDuration contractorId status",
-      })
-      .sort({ createdAt: -1 })
-      .lean();
+    if (response.role === "client") query.clientId = userId;
+    if (response.role === "contractor") query.contractorId = userId;
+    // query.isProjectCompleted = false;
+    console.log(query);
+    const projects = await Escrow.aggregate([
+      { $match: query },
+      { $sort: { createdAt: -1 } },
+      {
+        $lookup: {
+          from: "projectposts",
+          localField: "projectId",
+          foreignField: "_id",
+          as: "project",
+        },
+      },
+      {
+        $unwind: {
+          path: "$projectId",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
+          from: "proposals",
+          localField: "proposalId",
+          foreignField: "_id",
+          as: "proposal",
+        },
+      },
+      {
+        $unwind: {
+          path: "$proposalId",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          milestones: 1,
+          createdAt: 1,
+          projectId: {
+            _id: "$projectId._id",
+            projectTitle: "$projectId.projectTitle",
+            projectDescription: "$projectId.projectDescription",
+            projectCategory: "$projectId.projectCategory",
+          },
+          proposalId: {
+            _id: "$proposalId._id",
+            proposedBudget: "$proposalId.proposedBudget",
+            estimatedDuration: "$proposalId.estimatedDuration",
+            contractorId: "$proposalId.contractorId",
+            status: "$proposalId.status",
+          },
+        },
+      },
+    ]);
 
     return {
       success: true,

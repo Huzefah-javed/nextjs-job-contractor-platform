@@ -42,9 +42,6 @@ export async function transactionCreationAction({
       return { success: false, message: "Client or contractor email missing" };
     }
 
-    const formattedProjectId = new mongoose.Types.ObjectId(projectId);
-    const proposalId = new mongoose.Types.ObjectId(selectedProposalId);
-
     const result = await createTransaction({
       buyerEmail: clientEmail,
       sellerEmail: contractorEmail,
@@ -78,12 +75,14 @@ export async function transactionCreationAction({
     }
 
     const newEscrow = await Escrow.create({
-      proposalId,
-      projectId: formattedProjectId,
+      proposalId: selectedProposalId,
+      projectId,
       transactionId: result.transactionId,
       clientNextUrl: result.buyerNextUrl,
       contractorNextUrl: result.sellerNextUrl,
       milestones,
+      contractorId,
+      clientId,
     });
     if (!newEscrow && !newEscrow._id) {
       return {
@@ -111,7 +110,7 @@ export async function transactionCreationAction({
   } catch (error) {
     console.error("Error in adminTransactionCreation:");
     console.error("Error in adminTransactionCreation:", error.response);
-     console.error(
+    console.error(
       "Error in adminTransactionCreation2:",
       error.response.data.errors,
     );

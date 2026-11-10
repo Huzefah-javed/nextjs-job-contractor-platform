@@ -9,13 +9,16 @@ const escrowSchema = new mongoose.Schema(
         "termsAccepted",
         "payment_sent",
         "payment_approved",
-        "released",
         "refunded",
         "cancelled",
       ],
       default: "termsPending",
     },
     milestoneReleaseRequired: {
+      type: Boolean,
+      default: false,
+    },
+    isProjectCompleted: {
       type: Boolean,
       default: false,
     },
@@ -57,6 +60,16 @@ const escrowSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "ProjectPost",
       default: null,
+    },
+    clientId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    contractorId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
     },
     transactionId: {
       type: String,

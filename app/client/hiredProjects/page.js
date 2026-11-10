@@ -9,15 +9,12 @@ import {
 import ProjectCard from "./components/ProjectCards";
 
 const FILTER_TABS = [
-  { id: "milestone_ready", label: "Milestone Ready" },
   { id: "active", label: "Active Projects" },
-  { id: "awaiting_milestones", label: "Awaiting Milestones" },
-  { id: "hiredAwaitingEscrowFulfillment", label: "Escrow pendings" },
-  { id: "completed", label: "Completed Projects" },
+  { id: "escrowPending", label: "Escrow pendings" },
 ];
 
 export default function HiredProjectsPage() {
-  const [activeTab, setActiveTab] = useState("milestone_ready");
+  const [activeTab, setActiveTab] = useState("escrowPending");
   const [projects, setProjects] = useState([]);
   const [loading, startTransition] = useTransition();
   const [error, setError] = useState(null);
@@ -27,7 +24,8 @@ export default function HiredProjectsPage() {
       setError(null);
       const res = await getHiredProjects(activeTab);
       if (res.success) {
-        setProjects(res.projects);
+        // setProjects(res.projects);
+        console.log(res);
       } else {
         setError(res.error);
       }

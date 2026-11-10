@@ -137,6 +137,8 @@ export default function MessagesPage() {
           let obj = {
             chatId: convo.chatId,
             roomId: convo.roomId,
+            jobId: convo.jobId,
+            proposalId: convo.proposalId,
             clientId: convo.clientId,
             contractorId: convo.contractor._id,
             contractorName: convo.contractor.name,

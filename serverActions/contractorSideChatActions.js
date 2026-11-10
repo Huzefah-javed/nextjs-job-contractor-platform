@@ -57,6 +57,8 @@ export const gettingChatsForContractors = async () => {
           roomId: 1,
           _id: 1,
           contractorId: 1,
+          jobId: 1,
+          proposalId: 1,
           client: {
             id: "$client._id",
             name: "$client.name",

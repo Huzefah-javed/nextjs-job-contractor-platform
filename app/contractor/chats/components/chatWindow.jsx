@@ -7,6 +7,7 @@ import { readMsgAction } from "@/serverActions/clientSideChatActions";
 import {
   MessageAction,
   MessageLoadAction,
+  MessageOfferAcceptAction,
   MessageOfferDeclineAction,
 } from "@/serverActions/messagesAction";
 import { Check, Loader2, PlusCircle, Send } from "lucide-react";
@@ -57,15 +58,19 @@ export default function ChatWindow({ active, setMessages, messages }) {
     }
   };
 
-  const handleAcceptOffer = async (milestones) => {
+  const handleAcceptOffer = async (milestones, msgId, senderId) => {
     try {
-      const response = await transactionCreationAction({
-        milestones,
-        clientId: active.clientId,
-        contractorId: active.contractorId,
-        projectId: active.jobId,
-        selectedProposalId: active.proposalId,
-      });
+      const [response, response2] = await Promise.all([
+        MessageOfferAcceptAction(msgId, senderId),
+        transactionCreationAction({
+          milestones,
+          senderId,
+          clientId: active.clientId,
+          contractorId: active.contractorId,
+          projectId: active.jobId,
+          selectedProposalId: active.proposalId,
+        }),
+      ]);
       console.log(response);
     } catch (error) {
       console.log(error);
@@ -135,7 +140,9 @@ export default function ChatWindow({ active, setMessages, messages }) {
                           </div>
                           <div className="flex justify-between items-center text-[11px] text-slate-500 font-medium">
                             <span>Duration:</span>
-                            <span>{milestone.weeks || milestone.deadline} Weeks</span>
+                            <span>
+                              {milestone.weeks || milestone.deadline} Weeks
+                            </span>
                           </div>
                         </div>
                       ))}
@@ -162,7 +169,7 @@ export default function ChatWindow({ active, setMessages, messages }) {
                         </div>
                       ) : msg.offerStatus === "accepted" ? (
                         <div className="px-3.5 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-xl text-xs font-bold flex items-center gap-1.5">
-                          <span>Offer Accepted & Funded</span>
+                          <span>Offer Accepted</span>
                         </div>
                       ) : (
                         !isMe && (
@@ -180,7 +187,11 @@ export default function ChatWindow({ active, setMessages, messages }) {
                             <button
                               type="button"
                               onClick={() =>
-                                handleAcceptOffer(msg.offerMessage)
+                                handleAcceptOffer(
+                                  msg.offerMessage,
+                                  msg._id,
+                                  msg.senderId,
+                                )
                               }
                               className="px-4 py-2 bg-[#11b017] hover:bg-[#0ea013] text-white rounded-xl text-xs font-bold transition-all shadow-2xs cursor-pointer"
                             >
