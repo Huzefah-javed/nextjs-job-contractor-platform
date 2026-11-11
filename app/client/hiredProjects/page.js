@@ -24,7 +24,7 @@ export default function HiredProjectsPage() {
       setError(null);
       const res = await getHiredProjects(activeTab);
       if (res.success) {
-        // setProjects(res.projects);
+        setProjects(res.projects);
         console.log(res);
       } else {
         setError(res.error);
@@ -99,7 +99,11 @@ export default function HiredProjectsPage() {
             projects.map((project) => (
               <ProjectCard
                 key={project._id}
-                project={project}
+                project={project.project}
+                proposal={project.proposal}
+                milestones={project.milestones}
+                createdAt={project.createdAt}
+                escrowId={project._id}
                 activeTab={activeTab}
                 onReview={handleReview}
               />

@@ -78,6 +78,19 @@ export default function MessagesPage() {
   }, [active, conversations]);
 
   useEffect(() => {
+    socket.on("offerAction", ({ chatId, msgId, action }) => {
+      console.log("offer: ", action);
+      if (chatId === active.chatId) {
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg._id === msgId ? { ...msg, offerStatus: action } : msg,
+          ),
+        );
+      }
+    });
+  }, []);
+
+  useEffect(() => {
     socket.on("onlineUserDetected", (roomId) => {
       const isThere = conversations.find(
         (convo) => convo.roomId === roomId && convo.status === "online",

@@ -123,6 +123,19 @@ export default function MessagesPage() {
   }, [active, active.roomId]);
 
   useEffect(() => {
+    socket.on("offerAction", ({ chatId, msgId, action }) => {
+      console.log("offer: ", action);
+      if (chatId === active.chatId) {
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg._id === msgId ? { ...msg, offerStatus: action } : msg,
+          ),
+        );
+      }
+    });
+  }, []);
+
+  useEffect(() => {
     async function fetchData() {
       const result = await gettingChatsForContractors();
       if (result.success) {

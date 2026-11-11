@@ -17,7 +17,7 @@ export default function ChatWindow({ active, setMessages, messages }) {
   const [inputText, setInputText] = useState("");
   const [projectMilestoneModalStatus, setProjectMilestoneModalStatus] =
     useState(false);
-
+  const [processingId, setProcessingId] = useState(null);
   useEffect(() => {
     async function fetchMsgs() {
       const res = await MessageLoadAction(active.chatId);
@@ -53,6 +53,11 @@ export default function ChatWindow({ active, setMessages, messages }) {
   const handleDeclineOffer = async (msgId, senderId) => {
     const response = await MessageOfferDeclineAction(msgId, senderId);
     if (response.success) {
+      socket.emit("offerAction", {
+        chatId: active.chatId,
+        msgId,
+        action: "decline",
+      });
     } else {
       console.log(response.message || "failed to decline");
     }
@@ -60,6 +65,7 @@ export default function ChatWindow({ active, setMessages, messages }) {
 
   const handleAcceptOffer = async (milestones, msgId, senderId) => {
     try {
+      setProcessingId(msgId);
       const [response, response2] = await Promise.all([
         MessageOfferAcceptAction(msgId, senderId),
         transactionCreationAction({
@@ -71,7 +77,12 @@ export default function ChatWindow({ active, setMessages, messages }) {
           selectedProposalId: active.proposalId,
         }),
       ]);
-      console.log(response);
+      socket.emit("offerAction", {
+        chatId: active.chatId,
+        msgId,
+        action: "accepted",
+      });
+      setProcessingId(null);
     } catch (error) {
       console.log(error);
     }
@@ -186,6 +197,7 @@ export default function ChatWindow({ active, setMessages, messages }) {
                             </button>
                             <button
                               type="button"
+                              className="px-4 py-2 bg-[#11b017] hover:bg-[#0ea013] text-white rounded-xl text-xs font-bold transition-all shadow-2xs cursor-pointer"
                               onClick={() =>
                                 handleAcceptOffer(
                                   msg.offerMessage,
@@ -193,9 +205,11 @@ export default function ChatWindow({ active, setMessages, messages }) {
                                   msg.senderId,
                                 )
                               }
-                              className="px-4 py-2 bg-[#11b017] hover:bg-[#0ea013] text-white rounded-xl text-xs font-bold transition-all shadow-2xs cursor-pointer"
+                              disabled={processingId === msg._id}
                             >
-                              Accept & Fund
+                              {processingId === msg._id
+                                ? "Accepting..."
+                                : "Accept Offer"}
                             </button>
                           </div>
                         )

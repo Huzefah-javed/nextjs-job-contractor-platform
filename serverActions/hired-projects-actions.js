@@ -44,7 +44,7 @@ export async function getHiredProjects(filter) {
       },
       {
         $unwind: {
-          path: "$projectId",
+          path: "$project",
           preserveNullAndEmptyArrays: true,
         },
       },
@@ -58,7 +58,7 @@ export async function getHiredProjects(filter) {
       },
       {
         $unwind: {
-          path: "$proposalId",
+          path: "$proposal",
           preserveNullAndEmptyArrays: true,
         },
       },
@@ -67,18 +67,18 @@ export async function getHiredProjects(filter) {
           _id: 1,
           milestones: 1,
           createdAt: 1,
-          projectId: {
-            _id: "$projectId._id",
-            projectTitle: "$projectId.projectTitle",
-            projectDescription: "$projectId.projectDescription",
-            projectCategory: "$projectId.projectCategory",
+          project: {
+            _id: "$project._id",
+            projectTitle: "$project.projectTitle",
+            projectDescription: "$project.projectDescription",
+            projectCategory: "$project.projectCategory",
           },
-          proposalId: {
-            _id: "$proposalId._id",
-            proposedBudget: "$proposalId.proposedBudget",
-            estimatedDuration: "$proposalId.estimatedDuration",
-            contractorId: "$proposalId.contractorId",
-            status: "$proposalId.status",
+          proposal: {
+            _id: "$proposal._id",
+            proposedBudget: "$proposal.proposedBudget",
+            estimatedDuration: "$proposal.estimatedDuration",
+            contractorId: "$proposal.contractorId",
+            status: "$proposal.status",
           },
         },
       },

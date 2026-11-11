@@ -5,18 +5,26 @@ import ClientMilestoneReviewModal from "./ClientMilestoneReviewModal";
 import MilestoneReviewModal from "./MilestoneReviewModal";
 import EscrowStatusModal from "@/app/components/escrowModal";
 
-export default function ProjectCard({ project, activeTab, onReview }) {
+export default function ProjectCard({
+  project,
+  proposal,
+  milestones,
+  createdAt,
+  escrowId,
+  activeTab,
+  onReview,
+}) {
   const [showUpdateMilestones, setShowUpdateMilestones] = useState({});
   const [showMilestones, setShowMilestones] = useState(false);
   const [showEscrowModalwithId, setShowEscrowModalwithId] = useState(null);
 
-  const title = project.projectTitle || "Untitled Project";
-  const description = project.projectDescription || "No description provided.";
-  const budget = project.selectedProposalId?.proposedBudget || 0;
+  const title = project?.projectTitle || "Untitled Project";
+  const description = project?.projectDescription || "No description provided.";
+  const budget = proposal?.proposedBudget || 0;
 
-  const milestones = project.milestones || [];
-  const totalCount = milestones.length;
-  const completedCount = milestones.filter(
+  const currentMilestones = milestones || [];
+  const totalCount = currentMilestones.length;
+  const completedCount = currentMilestones.filter(
     (m) =>
       m.status === "completed" ||
       m.status === "released" ||
@@ -48,7 +56,7 @@ export default function ProjectCard({ project, activeTab, onReview }) {
         </div>
 
         <div className="bg-[#16A34A] text-white px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap shadow-sm">
-          ${budget.toLocaleString()} in budget
+          ${milestones.reduce((acc, elem) => (acc += elem.amount), 0)} in total
         </div>
       </div>
 
@@ -65,37 +73,35 @@ export default function ProjectCard({ project, activeTab, onReview }) {
           </div>
         </div>
       )}
-      <div className="flex items-center gap-3 mt-1">
-        <button className="bg-[#9CA3AF] hover:bg-gray-500 text-white px-6 py-2.5 rounded-full font-medium text-sm transition-colors cursor-pointer">
-          View Details
-        </button>
 
+      <div className="flex items-center gap-3 mt-1">
         {activeTab === "active" && (
           <button
             onClick={() =>
               setShowUpdateMilestones({
-                milestones: project.milestones,
-                projectId: project._id,
+                milestones: currentMilestones,
+                projectId: escrowId,
               })
             }
             className="bg-[#16A34A] hover:bg-green-700 text-white px-6 py-2.5 rounded-full font-medium text-sm transition-colors cursor-pointer shadow-sm"
           >
-            Update
+            View Details
           </button>
         )}
 
-        {activeTab === "milestone_ready" && (
+        {activeTab === "escrowPending" && (
           <button
             onClick={() => setShowMilestones(true)}
             className="bg-[#16A34A] hover:bg-green-700 text-white px-6 py-2.5 rounded-full font-medium text-sm transition-colors cursor-pointer shadow-sm"
           >
-            Accept Milestones
+            View Escrow status
           </button>
         )}
+
         {activeTab === "hiredAwaitingEscrowFulfillment" && (
           <button
             className="bg-[#16A34A] hover:bg-green-700 text-white px-6 py-2.5 rounded-full font-medium text-sm transition-colors cursor-pointer shadow-sm"
-            onClick={() => setShowEscrowModalwithId(project._id)}
+            onClick={() => setShowEscrowModalwithId(escrowId)}
           >
             Escrow status
           </button>
@@ -109,22 +115,11 @@ export default function ProjectCard({ project, activeTab, onReview }) {
           onClose={() => setShowUpdateMilestones({})}
         />
       )}
+
       {showMilestones && (
         <MilestoneReviewModal
-          milestones={milestones}
-          onClose={() => setShowModal(false)}
-          onApprove={() =>
-            onReview({
-              projectId: project._id,
-              action: "approve",
-            })
-          }
-          onReject={() =>
-            onReview({
-              projectId: project._id,
-              action: "reject",
-            })
-          }
+          milestones={currentMilestones}
+          onClose={() => setShowMilestones(false)}
         />
       )}
 
