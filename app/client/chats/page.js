@@ -79,8 +79,11 @@ export default function MessagesPage() {
 
   useEffect(() => {
     socket.on("offerAction", ({ chatId, msgId, action }) => {
-      console.log("offer: ", action);
+      // console.log(chatId === active.chatId);
+      console.log("offer: ", { chatId, msgId, action });
+      console.log(chatId === active.chatId, chatId, active.chatId);
       if (chatId === active.chatId) {
+        console.log("inside the condition");
         setMessages((prev) =>
           prev.map((msg) =>
             msg._id === msgId ? { ...msg, offerStatus: action } : msg,
@@ -88,7 +91,7 @@ export default function MessagesPage() {
         );
       }
     });
-  }, []);
+  }, [active]);
 
   useEffect(() => {
     socket.on("onlineUserDetected", (roomId) => {
