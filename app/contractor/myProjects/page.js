@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { getContractorProjectsAction } from "@/serverActions/getContractorProjectsAction";
 import SetupMilestoneModal from "../../components/milestoneSetup";
 import { Info } from "lucide-react";
 import MilestoneUpdateModal from "./components/milestoneUpdate";
+import { getHiredProjects } from "@/serverActions/hired-projects-actions";
 
 export default function MyProjectsPage() {
   const [projects, setProjects] = useState([]);
@@ -17,30 +17,24 @@ export default function MyProjectsPage() {
   const [updateOption, setUpdateOption] = useState({});
 
   const filters = [
-    { label: "All Projects", value: "all" },
-    { label: "Active", value: "active" },
-    { label: "milestone setup required", value: "milestoneSetup" },
-    { label: "Escrow pendings", value: "hiredAwaitingEscrowFulfillment" },
-    { label: "Completed", value: "completed" },
+    { value: "active", label: "Active Projects" },
+    { value: "escrowPending", label: "Escrow pendings" },
   ];
 
   const filterDescriptions = {
-    all: "View all of your project contracts across every phase.",
-    milestoneSetup:
-      "The client has accepted your proposal! Set up your milestones",
+    escrowPending:
+      "You and client need to complete escrow phase in order to make project active",
     active:
       "These are your ongoing projects that you are currently working on.",
-    completed:
-      "These are the projects you have successfully completed and delivered.",
   };
 
   useEffect(() => {
     async function fetchProjects() {
       setIsLoading(true);
       try {
-        const res = await getContractorProjectsAction(currentFilter);
+        const res = await getHiredProjects(currentFilter);
         if (res.success) {
-          setProjects(res.data);
+          setProjects(res.projects || []);
         }
       } catch (error) {
         console.error("Error loading projects:", error);
@@ -51,10 +45,6 @@ export default function MyProjectsPage() {
 
     fetchProjects();
   }, [currentFilter]);
-
-  const handleUpdateProgress = (projectId) => {
-    console.log("Opening progress update modal for:", projectId);
-  };
 
   const handleSetupMilestone = (projectId, proposalPrice, projectDuration) => {
     setProjectMilestoneModalData({ projectId, proposalPrice, projectDuration });
@@ -110,8 +100,14 @@ export default function MyProjectsPage() {
         </div>
       ) : (
         <div className="space-y-4">
-          {projects.map((project) => {
-            const milestones = project.milestones || [];
+          {projects.map((item) => {
+            const projectInfo = item.project || {};
+            const proposalInfo = item.proposal || {};
+            // Filter out any invalid string placeholders if they leaked into milestones array from backend parsing
+            const milestones = (item.milestones || []).filter(
+              (m) => typeof m === "object" && m !== null,
+            );
+
             const totalCount = milestones.length;
             const completedCount = milestones.filter(
               (m) =>
@@ -124,7 +120,7 @@ export default function MyProjectsPage() {
             let progressLabel = "";
 
             if (totalCount > 0) {
-              if (project.projectPhase === "completed") {
+              if (item.projectPhase === "completed") {
                 progressLabel = "ALL MILESTONES COMPLETED";
                 progressPercentage = 100;
               } else {
@@ -140,31 +136,41 @@ export default function MyProjectsPage() {
               }
             }
 
+            const projectPhase = item.projectPhase || "active";
+
             return (
               <div
-                key={project.id}
+                key={item._id}
                 className="bg-white border border-gray-200 rounded-[24px] p-6 shadow-sm hover:shadow-md transition-shadow duration-200 flex flex-col gap-6"
               >
                 {/* Top Section: Title & Budget Badge */}
                 <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
                   <div>
                     <h3 className="text-xl font-semibold text-[#16A34A]">
-                      {project.name}
+                      {projectInfo.projectTitle || "Untitled Project"}
                     </h3>
                     <p className="text-gray-500 text-sm mt-1">
-                      Client: {project.clientName || "Unknown"} • Deadline:{" "}
-                      {project.deadline || "TBD"}
+                      Category: {projectInfo.projectCategory || "N/A"} •
+                      Duration:{" "}
+                      {milestones.reduce(
+                        (acc, elem) => (acc += Number(elem.deadline)),
+                        0,
+                      ) + " weeks" || "TBD"}
                     </p>
                   </div>
 
                   <div className="bg-[#16A34A] text-white px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap shadow-sm">
-                    ${project.budget?.toLocaleString() || 0} in budget
+                    $
+                    {milestones.reduce(
+                      (acc, elem) => (acc += elem.amount),
+                      0,
+                    ) || 0}{" "}
+                    in budget
                   </div>
                 </div>
 
-                {/* Middle Section: Progress Bar (Only visible if milestones exist) */}
-                {(project.projectPhase === "active" ||
-                  project.projectPhase === "completed") && (
+                {/* Middle Section: Progress Bar */}
+                {currentFilter !== "escrowPending" && totalCount > 0 && (
                   <div className="w-full">
                     <p className="text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2.5">
                       {progressLabel}
@@ -180,18 +186,20 @@ export default function MyProjectsPage() {
 
                 {/* Bottom Section: Action Buttons */}
                 <div className="flex items-center gap-3 mt-1">
-                  {/* Universal Secondary Button */}
-                  <button className="bg-[#9CA3AF] hover:bg-gray-500 text-white px-6 py-2.5 rounded-full font-medium text-sm transition-colors cursor-pointer">
-                    View Details
-                  </button>
-
-                  {/* Context-Aware Primary Actions */}
-                  {project.projectPhase === "active" && (
+                  {projectPhase === "escrowPending" && (
+                    <button
+                      // onClick={() => setShowEscrowModalwithId(project._id)}
+                      className="bg-[#16A34A] hover:bg-green-700 text-white px-6 py-2.5 rounded-full font-medium text-sm transition-colors cursor-pointer shadow-sm"
+                    >
+                      View Escrow status
+                    </button>
+                  )}
+                  {projectPhase === "active" && (
                     <button
                       onClick={() =>
                         setUpdateOption({
-                          milestones: project.milestones,
-                          projectId: project.id,
+                          milestones: milestones,
+                          projectId: item._id,
                         })
                       }
                       className="bg-[#16A34A] hover:bg-green-700 text-white px-6 py-2.5 rounded-full font-medium text-sm transition-colors cursor-pointer shadow-sm"
@@ -200,13 +208,13 @@ export default function MyProjectsPage() {
                     </button>
                   )}
 
-                  {project.projectPhase === "milestoneSetup" && (
+                  {projectPhase === "milestoneSetup" && (
                     <button
                       onClick={() =>
                         handleSetupMilestone(
-                          project.id,
-                          project.budget,
-                          project.duration,
+                          item._id,
+                          proposalInfo.proposedBudget,
+                          proposalInfo.estimatedDuration,
                         )
                       }
                       className="bg-[#16A34A] hover:bg-green-700 text-white px-6 py-2.5 rounded-full font-medium text-sm transition-colors cursor-pointer shadow-sm"
@@ -214,14 +222,14 @@ export default function MyProjectsPage() {
                       Setup Milestone
                     </button>
                   )}
-                  {project.projectPhase ===
-                    "hiredAwaitingEscrowFulfillment" && (
+
+                  {projectPhase === "hiredAwaitingEscrowFulfillment" && (
                     <button className="bg-[#16A34A] hover:bg-green-700 text-white px-6 py-2.5 rounded-full font-medium text-sm transition-colors cursor-pointer shadow-sm">
                       Escrow status
                     </button>
                   )}
 
-                  {project.projectPhase === "completed" && (
+                  {projectPhase === "completed" && (
                     <button className="bg-gray-100 text-gray-400 px-6 py-2.5 rounded-full font-medium text-sm cursor-not-allowed">
                       Project Closed
                     </button>
@@ -231,7 +239,7 @@ export default function MyProjectsPage() {
             );
           })}
         </div>
-      )} 
+      )}
 
       {Object.keys(updateOption).length > 0 && (
         <MilestoneUpdateModal

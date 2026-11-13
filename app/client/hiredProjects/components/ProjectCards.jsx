@@ -91,7 +91,7 @@ export default function ProjectCard({
 
         {activeTab === "escrowPending" && (
           <button
-            onClick={() => setShowMilestones(true)}
+            onClick={() => setShowEscrowModalwithId(project._id)}
             className="bg-[#16A34A] hover:bg-green-700 text-white px-6 py-2.5 rounded-full font-medium text-sm transition-colors cursor-pointer shadow-sm"
           >
             View Escrow status
@@ -124,7 +124,10 @@ export default function ProjectCard({
       )}
 
       {showEscrowModalwithId && (
-        <EscrowStatusModal projectId={showEscrowModalwithId} />
+        <EscrowStatusModal
+          projectId={showEscrowModalwithId}
+          onClose={() => setShowEscrowModalwithId(null)}
+        />
       )}
     </div>
   );

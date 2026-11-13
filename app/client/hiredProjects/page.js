@@ -15,7 +15,7 @@ const FILTER_TABS = [
 
 export default function HiredProjectsPage() {
   const [activeTab, setActiveTab] = useState("escrowPending");
-  const [projects, setProjects] = useState([]);
+  const [escrows, setEscrows] = useState([]);
   const [loading, startTransition] = useTransition();
   const [error, setError] = useState(null);
 
@@ -24,7 +24,7 @@ export default function HiredProjectsPage() {
       setError(null);
       const res = await getHiredProjects(activeTab);
       if (res.success) {
-        setProjects(res.projects);
+        setEscrows(res.projects);
         console.log(res);
       } else {
         setError(res.error);
@@ -40,7 +40,7 @@ export default function HiredProjectsPage() {
       });
       if (res.success) {
         const updated = await getHiredProjects(activeTab);
-        if (updated.success) setProjects(updated.projects);
+        if (updated.success) setEscrows(updated.projects);
       } else {
         alert(`Failed: ${res.error}`);
       }
@@ -85,7 +85,7 @@ export default function HiredProjectsPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4">
-          {projects.length === 0 ? (
+          {escrows.length === 0 ? (
             <div className="text-center py-16 bg-white rounded-2xl border border-gray-200">
               <Layers className="mx-auto text-gray-400 mb-3" size={36} />
               <h3 className="text-sm font-bold text-gray-800">
@@ -96,14 +96,14 @@ export default function HiredProjectsPage() {
               </p>
             </div>
           ) : (
-            projects.map((project) => (
+            escrows.map((escrow) => (
               <ProjectCard
-                key={project._id}
-                project={project.project}
-                proposal={project.proposal}
-                milestones={project.milestones}
-                createdAt={project.createdAt}
-                escrowId={project._id}
+                key={escrow._id}
+                project={escrow.project}
+                proposal={escrow.proposal}
+                milestones={escrow.milestones}
+                createdAt={escrow.createdAt}
+                escrowId={escrow._id}
                 activeTab={activeTab}
                 onReview={handleReview}
               />
