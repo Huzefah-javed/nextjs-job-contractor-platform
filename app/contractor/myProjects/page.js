@@ -5,9 +5,10 @@ import SetupMilestoneModal from "../../components/milestoneSetup";
 import { Info } from "lucide-react";
 import MilestoneUpdateModal from "./components/milestoneUpdate";
 import { getHiredProjects } from "@/serverActions/hired-projects-actions";
+import EscrowStatusModal from "@/app/components/escrowModal";
 
 export default function MyProjectsPage() {
-  const [projects, setProjects] = useState([]);
+  const [escrows, setEscrows] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentFilter, setCurrentFilter] = useState("active");
 
@@ -15,6 +16,7 @@ export default function MyProjectsPage() {
     {},
   );
   const [updateOption, setUpdateOption] = useState({});
+  const [showEscrowModalwithId, setShowEscrowModalwithId] = useState(null);
 
   const filters = [
     { value: "active", label: "Active Projects" },
@@ -34,7 +36,7 @@ export default function MyProjectsPage() {
       try {
         const res = await getHiredProjects(currentFilter);
         if (res.success) {
-          setProjects(res.projects || []);
+          setEscrows(res.projects || []);
         }
       } catch (error) {
         console.error("Error loading projects:", error);
@@ -94,13 +96,13 @@ export default function MyProjectsPage() {
             />
           ))}
         </div>
-      ) : projects.length === 0 ? (
+      ) : escrows.length === 0 ? (
         <div className="bg-white border border-gray-200 rounded-[24px] p-10 text-center text-sm font-medium text-gray-500 shadow-sm">
           No projects found for this phase.
         </div>
       ) : (
         <div className="space-y-4">
-          {projects.map((item) => {
+          {escrows.map((item) => {
             const projectInfo = item.project || {};
             const proposalInfo = item.proposal || {};
             // Filter out any invalid string placeholders if they leaked into milestones array from backend parsing
@@ -120,7 +122,7 @@ export default function MyProjectsPage() {
             let progressLabel = "";
 
             if (totalCount > 0) {
-              if (item.projectPhase === "completed") {
+              if (completedCount.length === totalCount.length) {
                 progressLabel = "ALL MILESTONES COMPLETED";
                 progressPercentage = 100;
               } else {
@@ -136,7 +138,7 @@ export default function MyProjectsPage() {
               }
             }
 
-            const projectPhase = item.projectPhase || "active";
+            // constcurrentFilter = itemcurrentFilter || "active";
 
             return (
               <div
@@ -186,15 +188,15 @@ export default function MyProjectsPage() {
 
                 {/* Bottom Section: Action Buttons */}
                 <div className="flex items-center gap-3 mt-1">
-                  {projectPhase === "escrowPending" && (
+                  {currentFilter === "escrowPending" && (
                     <button
-                      // onClick={() => setShowEscrowModalwithId(project._id)}
+                      onClick={() => setShowEscrowModalwithId(item.project._id)}
                       className="bg-[#16A34A] hover:bg-green-700 text-white px-6 py-2.5 rounded-full font-medium text-sm transition-colors cursor-pointer shadow-sm"
                     >
                       View Escrow status
                     </button>
                   )}
-                  {projectPhase === "active" && (
+                  {currentFilter === "active" && (
                     <button
                       onClick={() =>
                         setUpdateOption({
@@ -208,7 +210,7 @@ export default function MyProjectsPage() {
                     </button>
                   )}
 
-                  {projectPhase === "milestoneSetup" && (
+                  {currentFilter === "milestoneSetup" && (
                     <button
                       onClick={() =>
                         handleSetupMilestone(
@@ -223,13 +225,13 @@ export default function MyProjectsPage() {
                     </button>
                   )}
 
-                  {projectPhase === "hiredAwaitingEscrowFulfillment" && (
+                  {currentFilter === "hiredAwaitingEscrowFulfillment" && (
                     <button className="bg-[#16A34A] hover:bg-green-700 text-white px-6 py-2.5 rounded-full font-medium text-sm transition-colors cursor-pointer shadow-sm">
                       Escrow status
                     </button>
                   )}
 
-                  {projectPhase === "completed" && (
+                  {currentFilter === "completed" && (
                     <button className="bg-gray-100 text-gray-400 px-6 py-2.5 rounded-full font-medium text-sm cursor-not-allowed">
                       Project Closed
                     </button>
@@ -252,6 +254,12 @@ export default function MyProjectsPage() {
             );
           }}
           onClose={() => setUpdateOption({})}
+        />
+      )}
+      {showEscrowModalwithId && (
+        <EscrowStatusModal
+          projectId={showEscrowModalwithId}
+          onClose={() => setShowEscrowModalwithId(null)}
         />
       )}
     </div>

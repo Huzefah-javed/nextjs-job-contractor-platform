@@ -3,6 +3,7 @@
 import { dbConnect } from "@/config/db.config";
 import { authAndGetUser } from "@/helpers/authAndGetUser";
 import Message from "@/schemas/message.schema";
+import { ProjectPost } from "@/schemas/project.schema";
 
 export const MessageAction = async (
   chatId,
@@ -68,7 +69,7 @@ export const MessageOfferDeclineAction = async (msgId, senderId) => {
   }
 };
 
-export const MessageOfferAcceptAction = async (msgId, senderId) => {
+export const MessageOfferAcceptAction = async (msgId, senderId, projectId) => {
   if (!msgId) return false;
 
   const res = await authAndGetUser();
@@ -78,11 +79,17 @@ export const MessageOfferAcceptAction = async (msgId, senderId) => {
 
   try {
     await dbConnect();
-    const updatedMessage = await Message.findByIdAndUpdate(msgId, {
-      offerStatus: "accepted",
-    });
+    const [updatedMessage, res2] = await Promise.all([
+      Message.findByIdAndUpdate(msgId, {
+        offerStatus: "accepted",
+      }),
+      ProjectPost.updateOne(
+        { _id: projectId },
+        { projectPhase: "underEscrow" },
+      ),
+    ]);
 
-    if (!updatedMessage) return false;
+    if (!updatedMessage || res2) return false;
     return { success: true };
   } catch (error) {
     console.log(error);

@@ -33,10 +33,6 @@ export async function POST(req) {
           { transactionId: transaction_id },
           { clientEscrowStatus: "payment_approved" },
         );
-        await ProjectPost.findByIdAndUpdate(projectId, {
-          projectPhase: "active",
-          projectActiveAt: new Date(),
-        });
         break;
 
       // case "released":

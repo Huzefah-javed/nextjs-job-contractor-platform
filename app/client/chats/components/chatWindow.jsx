@@ -71,7 +71,7 @@ export default function ChatWindow({ active, setMessages, messages }) {
       setProcessingId(msgId);
 
       const [response, response1] = await Promise.all([
-        MessageOfferAcceptAction(msgId, senderId),
+        MessageOfferAcceptAction(msgId, senderId, active.jobId),
         transactionCreationAction({
           milestones,
           senderId,

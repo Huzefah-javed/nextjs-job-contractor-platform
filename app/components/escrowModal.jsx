@@ -28,7 +28,7 @@ export default function EscrowStatusModal({ projectId, onClose }) {
     escrowData?.clientEscrowStatus === "payment_approved";
 
   const currentPendingStep = !isClientAgreed
-    ? 0
+    ? 1
     : !isContractorAgreed
       ? 1
       : !isPaymentSent
@@ -39,24 +39,28 @@ export default function EscrowStatusModal({ projectId, onClose }) {
 
   const steps = [
     {
+      step: 1,
       label: "Client Agreed to Terms",
       isCompleted: isClientAgreed,
       actionText: "Client Action Required",
       url: escrowData?.clientNextUrl,
     },
     {
+      step: 1,
       label: "Contractor Agreed to Terms",
       isCompleted: isContractorAgreed,
       actionText: "Contractor Action Required",
       url: escrowData?.contractorNextUrl,
     },
     {
+      step: 2,
       label: "Client Payment Sent (Funded)",
       isCompleted: isPaymentSent,
       actionText: "Fund Escrow (Client)",
       url: `https://www.escrow-sandbox.com/transactions/${escrowData?.transactionId}/payment`,
     },
     {
+      step: 3,
       label: "Client Payment Approved",
       isCompleted: isPaymentApproved,
       actionText: "View Status",
@@ -102,7 +106,7 @@ export default function EscrowStatusModal({ projectId, onClose }) {
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {steps.map((step, index) => {
-                  const isCurrentAction = index === currentPendingStep;
+                  const isCurrentAction = step.step === currentPendingStep;
 
                   return (
                     <tr
@@ -148,7 +152,7 @@ export default function EscrowStatusModal({ projectId, onClose }) {
                           </span>
                         ) : (
                           <span className="text-[10px] text-gray-400 uppercase font-bold tracking-wider">
-                            Awaiting Prior Steps
+                            Awaiting
                           </span>
                         )}
                       </td>
