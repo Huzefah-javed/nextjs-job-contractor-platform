@@ -2,7 +2,7 @@
 
 import React from "react";
 import { User, Briefcase, DollarSign, ExternalLink } from "lucide-react";
-import { adminTransactionCreation } from "@/serverActions/adminTransactionCreation";
+import { transactionCreationAction } from "@/serverActions/adminTransactionCreation";
 
 export default function PendingEscrowCard({ project, onCreateTransaction }) {
   const {
@@ -18,7 +18,7 @@ export default function PendingEscrowCard({ project, onCreateTransaction }) {
   } = project || {};
 
   const handleCreateTransaction = async () => {
-    const result = await adminTransactionCreation({
+    const result = await transactionCreationAction({
       projectId,
       projectTitle,
       milestones,
