@@ -18,6 +18,14 @@ export async function projectEscrowDetails(projectId) {
     const result = await Escrow.findOne({ projectId })
       .select(selectedFields)
       .lean();
+    if (
+      res.role === "client" &&
+      result.clientEscrowStatus !== "termsPending" &&
+      result.proposalEscrowStatus !== "termsPending"
+    ) {
+      result.paymentLink = `https://www.escrow-sandbox.com/transactions/${result?.transactionId}/payment`;
+    }
+
     return {
       success: true,
       data: result,

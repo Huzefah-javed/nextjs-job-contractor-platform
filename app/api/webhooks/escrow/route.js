@@ -29,7 +29,7 @@ export async function POST(req) {
         );
         break;
       case "payment_approved":
-        const { projectId } = await Escrow.findOneAndUpdate(
+        await Escrow.updateOne(
           { transactionId: transaction_id },
           { clientEscrowStatus: "payment_approved" },
         );

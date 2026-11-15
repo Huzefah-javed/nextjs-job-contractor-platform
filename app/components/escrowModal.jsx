@@ -57,7 +57,7 @@ export default function EscrowStatusModal({ projectId, onClose }) {
       label: "Client Payment Sent (Funded)",
       isCompleted: isPaymentSent,
       actionText: "Fund Escrow (Client)",
-      url: `https://www.escrow-sandbox.com/transactions/${escrowData?.transactionId}/payment`,
+      url: escrowData?.paymentLink,
     },
     {
       step: 3,
