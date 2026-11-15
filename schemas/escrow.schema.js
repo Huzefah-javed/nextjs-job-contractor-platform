@@ -79,6 +79,10 @@ const escrowSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+    activeAt: {
+      type: Date,
+      default: null,
+    },
     contractorNextUrl: {
       type: String,
       default: null,

@@ -31,7 +31,7 @@ export async function POST(req) {
       case "payment_approved":
         await Escrow.updateOne(
           { transactionId: transaction_id },
-          { clientEscrowStatus: "payment_approved" },
+          { clientEscrowStatus: "payment_approved", activeAt: new Date() },
         );
         break;
 
