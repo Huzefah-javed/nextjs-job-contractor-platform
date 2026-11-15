@@ -122,7 +122,7 @@ export default function MyProjectsPage() {
             let progressLabel = "";
 
             if (totalCount > 0) {
-              if (completedCount.length === totalCount.length) {
+              if (completedCount === totalCount.length) {
                 progressLabel = "ALL MILESTONES COMPLETED";
                 progressPercentage = 100;
               } else {
@@ -201,7 +201,7 @@ export default function MyProjectsPage() {
                       onClick={() =>
                         setUpdateOption({
                           milestones: milestones,
-                          projectId: item._id,
+                          escrowId: item._id,
                         })
                       }
                       className="bg-[#16A34A] hover:bg-green-700 text-white px-6 py-2.5 rounded-full font-medium text-sm transition-colors cursor-pointer shadow-sm"
@@ -245,14 +245,14 @@ export default function MyProjectsPage() {
 
       {Object.keys(updateOption).length > 0 && (
         <MilestoneUpdateModal
-          projectId={updateOption.projectId}
+          escrowId={updateOption.escrowId}
           milestones={updateOption.milestones}
-          onUpdateStatus={(milestoneId) => {
-            console.log(
-              "Tell the backend that milestone ID is ready for client review:",
-              milestoneId,
-            );
-          }}
+          // onUpdateStatus={(milestoneId) => {
+          //   console.log(
+          //     "Tell the backend that milestone ID is ready for client review:",
+          //     milestoneId,
+          //   );
+          // }}
           onClose={() => setUpdateOption({})}
         />
       )}

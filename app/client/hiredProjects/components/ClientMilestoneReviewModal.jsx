@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Check, X } from "lucide-react";
+import { Check, CheckCircle2, Clock, X } from "lucide-react";
 import { updateMilestoneStatusAction } from "@/serverActions/updateMilestoneStatusAction";
 import LoadingSpinner from "@/app/loading";
 
@@ -9,45 +9,26 @@ export default function ClientMilestoneReviewModal({
   milestones,
   projectId,
   onClose,
+  onUpdateStatus,
 }) {
   const [loading, setLoading] = useState(false);
 
-  async function handleApprove(milestoneId) {
+  async function handleMilestoneAction(milestoneId, newStatus) {
     try {
       setLoading(true);
       const res = await updateMilestoneStatusAction(
         projectId,
         milestoneId,
-        "approved",
+        newStatus,
       );
       if (res.success) {
         console.log(res.message);
+        if (onUpdateStatus) onUpdateStatus();
       } else {
         console.error(res.message);
       }
     } catch (error) {
-      console.error("Error approving milestone:", error);
-    } finally {
-      setLoading(false);
-      onClose();
-    }
-  }
-
-  async function handleReject(milestoneId) {
-    try {
-      setLoading(true);
-      const res = await updateMilestoneStatusAction(
-        projectId,
-        milestoneId,
-        "rejected",
-      );
-      if (res.success) {
-        console.log(res.message);
-      } else {
-        console.error(res.message);
-      }
-    } catch (error) {
-      console.error("Error rejecting milestone:", error);
+      console.error("Error updating milestone status:", error);
     } finally {
       setLoading(false);
       onClose();
@@ -64,7 +45,8 @@ export default function ClientMilestoneReviewModal({
               Review Milestones
             </h2>
             <p className="text-xs text-gray-500 mt-0.5">
-              Review submitted work and choose to approve or request revisions.
+              Review pending milestone work and manage approval or escrow
+              status.
             </p>
           </div>
           <button
@@ -99,25 +81,27 @@ export default function ClientMilestoneReviewModal({
 
               <tbody className="divide-y divide-gray-100">
                 {milestones.map((milestone) => {
-                  const statusStr = milestone.status?.toLowerCase() || "";
-                  const isSubmitted = statusStr === "submitted";
-                  const isApproved =
-                    statusStr === "approved" ||
-                    statusStr === "completed" ||
-                    statusStr === "released";
-                  const isRejected = statusStr === "rejected";
+                  const statusStr =
+                    milestone.status?.toLowerCase().trim() || "";
 
-                  // Dynamic Badge Colors
+                  // Strictly the 3 core statuses
+                  const isUnderProgress =
+                    statusStr === "under progress" ||
+                    statusStr === "underprogress";
+                  const isPending = statusStr === "pending";
+                  const isCompleted = statusStr === "completed";
+
+                  // Dynamic Badge Styling
                   let statusClasses = "bg-gray-100 text-gray-600";
-                  if (isSubmitted) {
+                  if (isUnderProgress) {
+                    statusClasses =
+                      "bg-blue-50 text-blue-600 border border-blue-100";
+                  } else if (isPending) {
                     statusClasses =
                       "bg-amber-50 text-amber-700 border border-amber-200";
-                  } else if (isApproved) {
+                  } else if (isCompleted) {
                     statusClasses =
                       "bg-[#16A34A]/10 text-[#16A34A] border border-[#16A34A]/20";
-                  } else if (isRejected) {
-                    statusClasses =
-                      "bg-red-50 text-red-600 border border-red-200";
                   }
 
                   return (
@@ -126,7 +110,9 @@ export default function ClientMilestoneReviewModal({
                       className="hover:bg-gray-50/50 transition-colors"
                     >
                       <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
-                        {milestone.title}
+                        {milestone.title?.includes("-")
+                          ? milestone.title.split("-")[0].slice(0, 30)
+                          : milestone.title}
                       </td>
 
                       <td className="px-6 py-4 text-gray-600 font-medium whitespace-nowrap">
@@ -146,28 +132,40 @@ export default function ClientMilestoneReviewModal({
                       </td>
 
                       <td className="px-6 py-4 text-right whitespace-nowrap">
-                        {isSubmitted ? (
+                        {isPending ? (
                           <div className="flex items-center justify-end gap-2">
                             <button
-                              onClick={() => handleReject(milestone._id)}
+                              onClick={() =>
+                                handleMilestoneAction(
+                                  milestone._id,
+                                  "under progress",
+                                )
+                              }
                               className="px-4 py-2 rounded-full font-medium text-xs bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 transition-colors cursor-pointer flex items-center gap-1"
                             >
-                              <X size={14} /> Reject
+                              <X size={14} /> Request Revision
                             </button>
                             <button
-                              onClick={() => handleApprove(milestone._id)}
+                              onClick={() =>
+                                handleMilestoneAction(
+                                  milestone._id,
+                                  "completed",
+                                )
+                              }
                               className="px-4 py-2 rounded-full font-medium text-xs bg-[#16A34A] hover:bg-green-700 text-white transition-colors cursor-pointer shadow-sm flex items-center gap-1"
                             >
-                              <Check size={14} /> Approve
+                              <Check size={14} /> Approve & Complete
                             </button>
                           </div>
+                        ) : isCompleted ? (
+                          <span className="inline-flex items-center gap-1.5 text-xs font-medium text-[#16A34A] bg-[#16A34A]/10 px-3 py-1.5 rounded-lg border border-[#16A34A]/20">
+                            <CheckCircle2 size={13} />
+                            Completed
+                          </span>
                         ) : (
-                          <span className="text-xs text-gray-400 font-medium">
-                            {isApproved
-                              ? "Approved"
-                              : isRejected
-                                ? "Revision Requested"
-                                : "In Progress"}
+                          <span className="inline-flex items-center gap-1.5 text-xs font-medium text-blue-600 bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-100">
+                            <Clock size={13} />
+                            In Progress (Contractor working)
                           </span>
                         )}
                       </td>

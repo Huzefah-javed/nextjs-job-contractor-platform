@@ -1,30 +1,31 @@
 "use client";
 
 import React, { useState } from "react";
-import { CheckCircle2, X } from "lucide-react";
+import { CheckCircle2, Clock, X, AlertCircle } from "lucide-react";
 import { submitMilestoneAction } from "@/serverActions/submitMilestoneAction";
 import LoadingSpinner from "@/app/loading";
 
 export default function MilestoneUpdateModal({
   milestones,
-  projectId,
+  escrowId,
   onUpdateStatus,
   onClose,
 }) {
   const [loading, setLoading] = useState(false);
 
   async function handleProjectSubmit(milestoneId) {
-    if (!projectId) {
-      console.error("Project ID is not available.");
+    if (!escrowId) {
+      console.error("escrow ID is not available.");
       return;
     }
 
     try {
       setLoading(true);
-      const response = await submitMilestoneAction(projectId, milestoneId);
+      const response = await submitMilestoneAction(escrowId, milestoneId);
 
       if (response.success) {
         console.log("Success:", response.message);
+        if (onUpdateStatus) onUpdateStatus();
       } else {
         console.error("Error:", response.message);
       }
@@ -76,18 +77,25 @@ export default function MilestoneUpdateModal({
 
               <tbody className="divide-y divide-gray-100">
                 {milestones.map((milestone) => {
-                  const statusStr = milestone.status?.toLowerCase() || "";
+                  const statusStr =
+                    milestone.status?.toLowerCase().trim() || "";
 
-                  // Logic: Only pending can submit. Approved cannot.
+                  // Exactly three statuses configured
+                  const isUnderProgress =
+                    statusStr === "under progress" ||
+                    statusStr === "underprogress";
                   const isPending = statusStr === "pending";
-                  const isApproved = statusStr === "approved";
+                  const isCompleted = statusStr === "completed";
 
-                  // Dynamic Badge Styling
+                  // Dynamic Badge & Status Styling
                   let statusClasses = "bg-gray-100 text-gray-600";
-                  if (isPending) {
+                  if (isUnderProgress) {
+                    statusClasses =
+                      "bg-blue-50 text-blue-600 border border-blue-100";
+                  } else if (isPending) {
                     statusClasses =
                       "bg-amber-50 text-amber-600 border border-amber-100";
-                  } else if (isApproved) {
+                  } else if (isCompleted) {
                     statusClasses =
                       "bg-[#16A34A]/10 text-[#16A34A] border border-[#16A34A]/20";
                   }
@@ -98,7 +106,9 @@ export default function MilestoneUpdateModal({
                       className="hover:bg-gray-50/50 transition-colors"
                     >
                       <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
-                        {milestone.title}
+                        {milestone.title?.includes("-")
+                          ? milestone.title.split("-")[0].slice(0, 30)
+                          : milestone.title}
                       </td>
 
                       <td className="px-6 py-4 text-gray-600 font-medium whitespace-nowrap">
@@ -118,26 +128,28 @@ export default function MilestoneUpdateModal({
                       </td>
 
                       <td className="px-6 py-4 text-right whitespace-nowrap">
-                        <button
-                          onClick={() => handleProjectSubmit(milestone._id)}
-                          disabled={!isPending}
-                          className={`px-5 py-2.5 rounded-full font-medium text-xs transition-all inline-flex items-center justify-center gap-2 shadow-sm
-                            ${
-                              isPending
-                                ? "bg-[#16A34A] hover:bg-green-700 text-white cursor-pointer"
-                                : "bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200"
-                            }
-                          `}
-                        >
-                          {!isPending ? (
-                            <>
-                              <CheckCircle2 size={14} />
-                              {isApproved ? "Approved" : "Submitted"}
-                            </>
-                          ) : (
-                            "Submit Work"
-                          )}
-                        </button>
+                        {isUnderProgress ? (
+                          <button
+                            onClick={() => handleProjectSubmit(milestone._id)}
+                            className="px-5 py-2.5 rounded-full font-medium text-xs transition-all inline-flex items-center justify-center gap-2 shadow-sm bg-[#16A34A] hover:bg-green-700 text-white cursor-pointer"
+                          >
+                            Submit Work
+                          </button>
+                        ) : isPending ? (
+                          <span className="inline-flex items-center gap-1.5 text-xs font-medium text-amber-600 bg-amber-50 px-3 py-1.5 rounded-lg border border-amber-200/60">
+                            <Clock size={13} />
+                            Awaiting Review / Escrow
+                          </span>
+                        ) : isCompleted ? (
+                          <span className="inline-flex items-center gap-1.5 text-xs font-medium text-[#16A34A] bg-[#16A34A]/10 px-3 py-1.5 rounded-lg border border-[#16A34A]/20">
+                            <CheckCircle2 size={13} />
+                            Completed
+                          </span>
+                        ) : (
+                          <span className="text-xs text-gray-400 italic">
+                            No action available
+                          </span>
+                        )}
                       </td>
                     </tr>
                   );

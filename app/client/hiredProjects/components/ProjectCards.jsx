@@ -2,7 +2,6 @@
 
 import React, { useState } from "react";
 import ClientMilestoneReviewModal from "./ClientMilestoneReviewModal";
-import MilestoneReviewModal from "./MilestoneReviewModal";
 import EscrowStatusModal from "@/app/components/escrowModal";
 
 export default function ProjectCard({
@@ -15,7 +14,6 @@ export default function ProjectCard({
   onReview,
 }) {
   const [showUpdateMilestones, setShowUpdateMilestones] = useState({});
-  const [showMilestones, setShowMilestones] = useState(false);
   const [showEscrowModalwithId, setShowEscrowModalwithId] = useState(null);
 
   const title = project?.projectTitle || "Untitled Project";
@@ -97,15 +95,6 @@ export default function ProjectCard({
             View Escrow status
           </button>
         )}
-
-        {activeTab === "hiredAwaitingEscrowFulfillment" && (
-          <button
-            className="bg-[#16A34A] hover:bg-green-700 text-white px-6 py-2.5 rounded-full font-medium text-sm transition-colors cursor-pointer shadow-sm"
-            onClick={() => setShowEscrowModalwithId(escrowId)}
-          >
-            Escrow status
-          </button>
-        )}
       </div>
 
       {Object.keys(showUpdateMilestones).length > 0 && (
@@ -113,13 +102,6 @@ export default function ProjectCard({
           milestones={showUpdateMilestones.milestones}
           projectId={showUpdateMilestones.projectId}
           onClose={() => setShowUpdateMilestones({})}
-        />
-      )}
-
-      {showMilestones && (
-        <MilestoneReviewModal
-          milestones={currentMilestones}
-          onClose={() => setShowMilestones(false)}
         />
       )}
 
