@@ -1,33 +1,36 @@
 "use server";
 
 import { dbConnect } from "@/config/db.config";
+import { Escrow } from "@/schemas/escrow.schema";
 import { ProjectPost } from "@/schemas/project.schema";
 
 export async function updateMilestoneStatusAction(
-  projectId,
+  escrowId,
   milestoneId,
   newStatus,
 ) {
   try {
     dbConnect();
 
-    const allowedStatuses = ["approved", "rejected"];
+    const allowedStatuses = ["approved", "underprogress"];
     let normalizedStatus = newStatus?.toLowerCase();
 
-    if (!allowedStatuses.includes(normalizedStatus)) {
+    if (!allowedStatuses.includes(normalizedStatus.toLowerCase())) {
       return { success: false, message: "Invalid status value provided" };
     }
+    const updateFieldQuery = {
+      $set: { "milestones.$.status": newStatus },
+    };
 
-    if (normalizedStatus === "rejected") normalizedStatus = "pending";
-
-    const updatedProject = await ProjectPost.findOneAndUpdate(
+    if (normalizedStatus === "approved") {
+      updateFieldQuery.$set.milestoneReleaseRequired = true;
+    }
+    const updatedProject = await Escrow.findOneAndUpdate(
       {
-        _id: projectId,
+        _id: escrowId,
         "milestones._id": milestoneId,
       },
-      {
-        $set: { "milestones.$.status": normalizedStatus },
-      },
+      updateFieldQuery,
       { new: true },
     );
 

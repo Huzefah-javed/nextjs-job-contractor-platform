@@ -37,7 +37,7 @@ const escrowSchema = new mongoose.Schema(
         },
         status: {
           type: String,
-          enum: ["underProgress", "pending", "completed"],
+          enum: ["underProgress", "pending", "approved","completed"],
           default: "underProgress",
         },
         deadline: {

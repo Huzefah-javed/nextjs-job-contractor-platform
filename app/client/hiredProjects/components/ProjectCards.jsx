@@ -78,7 +78,7 @@ export default function ProjectCard({
             onClick={() =>
               setShowUpdateMilestones({
                 milestones: currentMilestones,
-                projectId: escrowId,
+                escrowId: escrowId,
               })
             }
             className="bg-[#16A34A] hover:bg-green-700 text-white px-6 py-2.5 rounded-full font-medium text-sm transition-colors cursor-pointer shadow-sm"
@@ -100,7 +100,7 @@ export default function ProjectCard({
       {Object.keys(showUpdateMilestones).length > 0 && (
         <ClientMilestoneReviewModal
           milestones={showUpdateMilestones.milestones}
-          projectId={showUpdateMilestones.projectId}
+          escrowId={showUpdateMilestones.escrowId}
           onClose={() => setShowUpdateMilestones({})}
         />
       )}

@@ -11,7 +11,7 @@ export default function AdminSidebar() {
     { label: "Dashboard", href: "/admin/dashboard" },
     { label: "User Management", href: "/admin/userManagement" },
     { label: "Job Approvals", href: "/admin/jobApprovals" },
-    { label: "Escrow Pending projects", href: "/admin/escrowPending" },
+    { label: "Escrow fund release", href: "/admin/escrowRelease" },
   ];
 
   return (

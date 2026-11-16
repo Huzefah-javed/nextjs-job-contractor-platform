@@ -7,7 +7,7 @@ import LoadingSpinner from "@/app/loading";
 
 export default function ClientMilestoneReviewModal({
   milestones,
-  projectId,
+  escrowId,
   onClose,
   onUpdateStatus,
 }) {
@@ -17,7 +17,7 @@ export default function ClientMilestoneReviewModal({
     try {
       setLoading(true);
       const res = await updateMilestoneStatusAction(
-        projectId,
+        escrowId,
         milestoneId,
         newStatus,
       );
@@ -37,7 +37,7 @@ export default function ClientMilestoneReviewModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-      <div className="bg-white border border-gray-200 rounded-[24px] shadow-xl w-full max-w-4xl relative flex flex-col max-h-[90vh] overflow-hidden">
+      <div className="bg-white border border-gray-200 rounded-[24px] shadow-xl w-full max-w-5xl relative flex flex-col max-h-[90vh] overflow-hidden">
         {loading && <LoadingSpinner />}
         <div className="flex items-center justify-between px-8 py-6 border-b border-gray-100 bg-white">
           <div>
@@ -85,10 +85,9 @@ export default function ClientMilestoneReviewModal({
                     milestone.status?.toLowerCase().trim() || "";
 
                   // Strictly the 3 core statuses
-                  const isUnderProgress =
-                    statusStr === "under progress" ||
-                    statusStr === "underprogress";
+                  const isUnderProgress = statusStr === "underprogress";
                   const isPending = statusStr === "pending";
+                  const isApproved = statusStr === "approved";
                   const isCompleted = statusStr === "completed";
 
                   // Dynamic Badge Styling
@@ -99,7 +98,7 @@ export default function ClientMilestoneReviewModal({
                   } else if (isPending) {
                     statusClasses =
                       "bg-amber-50 text-amber-700 border border-amber-200";
-                  } else if (isCompleted) {
+                  } else if (isCompleted || isApproved) {
                     statusClasses =
                       "bg-[#16A34A]/10 text-[#16A34A] border border-[#16A34A]/20";
                   }
@@ -133,39 +132,42 @@ export default function ClientMilestoneReviewModal({
 
                       <td className="px-6 py-4 text-right whitespace-nowrap">
                         {isPending ? (
-                          <div className="flex items-center justify-end gap-2">
+                          <div className="inline-flex items-center gap-1.5">
                             <button
                               onClick={() =>
                                 handleMilestoneAction(
                                   milestone._id,
-                                  "under progress",
+                                  "underProgress",
                                 )
                               }
-                              className="px-4 py-2 rounded-full font-medium text-xs bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 transition-colors cursor-pointer flex items-center gap-1"
+                              className="px-2.5 py-1 rounded-md font-medium text-[11px] bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 transition-colors cursor-pointer inline-flex items-center gap-1"
+                              title="Request Revision"
                             >
-                              <X size={14} /> Request Revision
+                              <X size={12} /> Revise
                             </button>
                             <button
                               onClick={() =>
-                                handleMilestoneAction(
-                                  milestone._id,
-                                  "completed",
-                                )
+                                handleMilestoneAction(milestone._id, "approved")
                               }
-                              className="px-4 py-2 rounded-full font-medium text-xs bg-[#16A34A] hover:bg-green-700 text-white transition-colors cursor-pointer shadow-sm flex items-center gap-1"
+                              className="px-2.5 py-1 rounded-md font-medium text-[11px] bg-[#16A34A] hover:bg-green-700 text-white transition-colors cursor-pointer shadow-sm inline-flex items-center gap-1"
+                              title="Approve & Complete"
                             >
-                              <Check size={14} /> Approve & Complete
+                              <Check size={12} /> Approve
                             </button>
                           </div>
                         ) : isCompleted ? (
-                          <span className="inline-flex items-center gap-1.5 text-xs font-medium text-[#16A34A] bg-[#16A34A]/10 px-3 py-1.5 rounded-lg border border-[#16A34A]/20">
-                            <CheckCircle2 size={13} />
+                          <span className="inline-flex items-center gap-1 text-[11px] font-medium text-[#16A34A] bg-[#16A34A]/10 px-2 py-1 rounded-md border border-[#16A34A]/20">
+                            <CheckCircle2 size={12} />
                             Completed
                           </span>
+                        ) : isApproved ? (
+                          <span className="inline-flex items-center gap-1 text-[11px] font-medium text-[#16A34A] bg-[#16A34A]/10 px-2 py-1 rounded-md border border-[#16A34A]/20">
+                            Admin to release funds
+                          </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1.5 text-xs font-medium text-blue-600 bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-100">
-                            <Clock size={13} />
-                            In Progress (Contractor working)
+                          <span className="inline-flex items-center gap-1 text-[11px] font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded-md border border-blue-100">
+                            <Clock size={12} />
+                            In Progress
                           </span>
                         )}
                       </td>

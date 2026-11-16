@@ -81,11 +81,10 @@ export default function MilestoneUpdateModal({
                     milestone.status?.toLowerCase().trim() || "";
 
                   // Exactly three statuses configured
-                  const isUnderProgress =
-                    statusStr === "under progress" ||
-                    statusStr === "underprogress";
-                  const isPending = statusStr === "pending";
+                  const isUnderProgress = statusStr === "underprogress";
                   const isCompleted = statusStr === "completed";
+                  const isPending = statusStr === "pending";
+                  const isApproved = statusStr === "approved";
 
                   // Dynamic Badge & Status Styling
                   let statusClasses = "bg-gray-100 text-gray-600";
@@ -116,7 +115,7 @@ export default function MilestoneUpdateModal({
                       </td>
 
                       <td className="px-6 py-4 text-gray-500 whitespace-nowrap">
-                        {milestone.deadline}
+                        {milestone.deadline} weeks
                       </td>
 
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -144,6 +143,10 @@ export default function MilestoneUpdateModal({
                           <span className="inline-flex items-center gap-1.5 text-xs font-medium text-[#16A34A] bg-[#16A34A]/10 px-3 py-1.5 rounded-lg border border-[#16A34A]/20">
                             <CheckCircle2 size={13} />
                             Completed
+                          </span>
+                        ) : isApproved ? (
+                          <span className="inline-flex items-center gap-1.5 text-xs font-medium text-[#16A34A] bg-[#16A34A]/10 px-3 py-1.5 rounded-lg border border-[#16A34A]/20">
+                            Admin to release fund
                           </span>
                         ) : (
                           <span className="text-xs text-gray-400 italic">

@@ -1,19 +1,19 @@
 "use server";
 
 import { dbConnect } from "@/config/db.config";
-import { ProjectPost } from "@/schemas/project.schema";
+import { Escrow } from "@/schemas/escrow.schema";
 import { Proposal } from "@/schemas/proposal.schema";
 import { users } from "@/schemas/user.schema";
+import { ProjectPost } from "@/schemas/project.schema";
 
 export async function getPendingEscrowProjectsAction() {
   try {
     await dbConnect();
 
-    const projects = await ProjectPost.aggregate([
+    const projects = await Escrow.aggregate([
       {
         $match: {
-          projectPhase: "pendingEscrowCreation",
-          milestoneApproved: "approved",
+          milestoneReleaseRequired: true,
         },
       },
       {
@@ -27,38 +27,34 @@ export async function getPendingEscrowProjectsAction() {
       { $unwind: { path: "$client", preserveNullAndEmptyArrays: true } },
       {
         $lookup: {
-          from: "proposals",
-          localField: "selectedProposalId",
-          foreignField: "_id",
-          as: "proposal",
-        },
-      },
-      { $unwind: { path: "$proposal", preserveNullAndEmptyArrays: true } },
-      {
-        $lookup: {
           from: "users",
-          localField: "proposal.contractorId",
+          localField: "contractorId",
           foreignField: "_id",
           as: "contractor",
         },
       },
       { $unwind: { path: "$contractor", preserveNullAndEmptyArrays: true } },
       {
+        $lookup: {
+          from: "projectposts",
+          localField: "projectId",
+          foreignField: "_id",
+          as: "project",
+        },
+      },
+      { $unwind: { path: "$project", preserveNullAndEmptyArrays: true } },
+      {
         $project: {
-          _id: 0,
-          projectId: { $toString: "$_id" },
-          projectTitle: { $ifNull: ["$projectTitle", "Untitled Project"] },
-          selectedProposalId: { $toString: "$selectedProposalId" },
+          _id: 1,
+          milestones: 1,
+          transactionId: 1,
+          projectTitle: {
+            $ifNull: ["$project.projectTitle", "Untitled Project"],
+          },
           clientName: { $ifNull: ["$client.name", "Unknown Client"] },
-          clientEmail: { $ifNull: ["$client.email", "$client.companyEmail"] },
           contractorName: {
             $ifNull: ["$contractor.name", "Unknown Contractor"],
           },
-          milestones: "$milestones",
-          contractorEmail: {
-            $ifNull: ["$contractor.email", "$contractor.companyEmail"],
-          },
-          amount: { $ifNull: ["$proposal.proposedBudget", 0] },
         },
       },
     ]);
