@@ -1,24 +1,66 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { X, CheckCircle2, Clock, ExternalLink, Info } from "lucide-react";
+import React, { useEffect, useState, useCallback } from "react";
+import {
+  X,
+  CheckCircle2,
+  Clock,
+  ExternalLink,
+  Info,
+  ShieldAlert,
+  ShieldCheck,
+  RefreshCw,
+} from "lucide-react";
 import { projectEscrowDetails } from "@/serverActions/projectEscrowDetails";
 
-export default function EscrowStatusModal({ projectId, onClose }) {
+export default function EscrowStatusModal({
+  projectId,
+  onClose,
+  onVerifyClick, // Optional handler if verification uses a custom modal/action
+}) {
   const [escrowData, setEscrowData] = useState({});
+  const [checkingStatus, setCheckingStatus] = useState(false);
 
-  useEffect(() => {
-    async function fetch() {
+  const fetchEscrowDetails = useCallback(async () => {
+    if (!projectId) return;
+    try {
+      setCheckingStatus(true);
       const result = await projectEscrowDetails(projectId);
       console.log("result ", result);
       if (result.success) {
         setEscrowData(result.data);
       } else {
-        alert("Error");
+        alert("Error fetching escrow details");
       }
+    } catch (error) {
+      console.error("Error fetching escrow status:", error);
+    } finally {
+      setCheckingStatus(false);
     }
-    fetch();
-  }, []);
+  }, [projectId]);
+
+  useEffect(() => {
+    fetchEscrowDetails();
+  }, [fetchEscrowDetails]);
+
+  // Detect which side's verification field is provided by the API
+  const isContractorSide =
+    typeof escrowData?.contractorEscrowVerified !== "undefined";
+  const isClientSide = typeof escrowData?.clientEscrowVerified !== "undefined";
+
+  const isEscrowVerified = isContractorSide
+    ? Boolean(escrowData.contractorEscrowVerified)
+    : isClientSide
+      ? Boolean(escrowData.clientEscrowVerified)
+      : false;
+
+  const verificationLabel = isContractorSide
+    ? "Contractor Escrow Verification"
+    : "Client Escrow Verification";
+
+  const verificationUrl = isContractorSide
+    ? escrowData?.contractorVerificationUrl || escrowData?.contractorNextUrl
+    : escrowData?.clientVerificationUrl || escrowData?.clientNextUrl;
 
   const isClientAgreed = escrowData?.clientEscrowStatus !== "termsPending";
   const isContractorAgreed =
@@ -27,40 +69,43 @@ export default function EscrowStatusModal({ projectId, onClose }) {
   const isPaymentApproved =
     escrowData?.clientEscrowStatus === "payment_approved";
 
-  const currentPendingStep = !isClientAgreed
+  // Step 1 is now Verification; subsequent steps shift accordingly
+  const currentPendingStep = !isEscrowVerified
     ? 1
-    : !isContractorAgreed
-      ? 1
-      : !isPaymentSent
+    : !isClientAgreed
+      ? 2
+      : !isContractorAgreed
         ? 2
-        : !isPaymentApproved
+        : !isPaymentSent
           ? 3
-          : -1;
+          : !isPaymentApproved
+            ? 4
+            : -1;
 
   const steps = [
     {
-      step: 1,
+      step: 2,
       label: "Client Agreed to Terms",
       isCompleted: isClientAgreed,
       actionText: "Client Action Required",
       url: escrowData?.clientNextUrl,
     },
     {
-      step: 1,
+      step: 2,
       label: "Contractor Agreed to Terms",
       isCompleted: isContractorAgreed,
       actionText: "Contractor Action Required",
       url: escrowData?.contractorNextUrl,
     },
     {
-      step: 2,
+      step: 3,
       label: "Client Payment Sent (Funded)",
       isCompleted: isPaymentSent,
       actionText: "Fund Escrow (Client)",
       url: escrowData?.paymentLink,
     },
     {
-      step: 3,
+      step: 4,
       label: "Client Payment Approved",
       isCompleted: isPaymentApproved,
       actionText: "View Status",
@@ -79,7 +124,8 @@ export default function EscrowStatusModal({ projectId, onClose }) {
               Escrow Contract Status
             </h2>
             <p className="text-xs text-gray-500 mt-0.5">
-              Track the agreement and funding status for this project.
+              Track verification, agreement, and funding status for this
+              project.
             </p>
           </div>
           {onClose && (
@@ -105,6 +151,86 @@ export default function EscrowStatusModal({ projectId, onClose }) {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
+                {/* STEP 1: Escrow Verification (Top Row) */}
+                {(isContractorSide || isClientSide) && (
+                  <tr className="bg-amber-50/20 hover:bg-gray-50/60 transition-colors">
+                    <td className="px-8 py-5">
+                      <div className="flex items-center gap-2">
+                        <span className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-gray-900 text-white text-[10px] font-bold shrink-0">
+                          1
+                        </span>
+                        <div>
+                          <p className="font-bold text-gray-900">
+                            {verificationLabel}
+                          </p>
+                          <p className="text-[11px] text-gray-500 mt-0.5">
+                            {isEscrowVerified
+                              ? "Your escrow account is verified and ready."
+                              : "Verification is required before proceeding."}
+                          </p>
+                        </div>
+                      </div>
+                    </td>
+
+                    <td className="px-8 py-5">
+                      {isEscrowVerified ? (
+                        <div className="inline-flex items-center gap-1.5 bg-[#16A34A]/10 text-[#16A34A] px-3 py-1 rounded-full text-xs font-bold border border-[#16A34A]/20">
+                          <ShieldCheck size={14} />
+                          Verified
+                        </div>
+                      ) : (
+                        <div className="inline-flex items-center gap-1.5 bg-red-50 text-red-600 px-3 py-1 rounded-full text-xs font-bold border border-red-200">
+                          <ShieldAlert size={14} />
+                          Not Verified
+                        </div>
+                      )}
+                    </td>
+
+                    <td className="px-8 py-5 text-right">
+                      <div className="inline-flex items-center justify-end gap-2">
+                        {!isEscrowVerified &&
+                          (onVerifyClick ? (
+                            <button
+                              onClick={onVerifyClick}
+                              className="inline-flex items-center gap-1.5 bg-[#16A34A] hover:bg-green-700 text-white px-3.5 py-1.5 rounded-full font-semibold text-xs transition-all cursor-pointer shadow-sm"
+                            >
+                              Verify Yourself
+                            </button>
+                          ) : verificationUrl ? (
+                            <a
+                              href={verificationUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 bg-[#16A34A] hover:bg-green-700 text-white px-3.5 py-1.5 rounded-full font-semibold text-xs transition-all cursor-pointer shadow-sm"
+                            >
+                              Verify Yourself
+                              <ExternalLink size={12} />
+                            </a>
+                          ) : (
+                            <span className="inline-flex items-center gap-1.5 bg-[#16A34A] text-white px-3.5 py-1.5 rounded-full font-semibold text-xs opacity-90">
+                              Verify Yourself
+                            </span>
+                          ))}
+
+                        <button
+                          onClick={fetchEscrowDetails}
+                          disabled={checkingStatus}
+                          className="inline-flex items-center gap-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 px-3.5 py-1.5 rounded-full font-semibold text-xs transition-all cursor-pointer border border-gray-200 disabled:opacity-50"
+                        >
+                          <RefreshCw
+                            size={12}
+                            className={checkingStatus ? "animate-spin" : ""}
+                          />
+                          {checkingStatus
+                            ? "Checking..."
+                            : "Check Your Escrow Status"}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                )}
+
+                {/* SUBSEQUENT STEPS */}
                 {steps.map((step, index) => {
                   const isCurrentAction = step.step === currentPendingStep;
 
@@ -179,6 +305,18 @@ export default function EscrowStatusModal({ projectId, onClose }) {
                 </span>
                 <p className="text-xs text-gray-600 leading-relaxed">
                   <strong className="text-gray-800 font-semibold block mb-0.5">
+                    Escrow Account Verification
+                  </strong>
+                  Verify your escrow account status first. Once verified, you
+                  can proceed with contract terms and funding.
+                </p>
+              </li>
+              <li className="flex items-start gap-3">
+                <span className="flex items-center justify-center w-5 h-5 rounded-full bg-[#16A34A]/10 text-[#16A34A] text-[10px] font-bold shrink-0 mt-0.5">
+                  2
+                </span>
+                <p className="text-xs text-gray-600 leading-relaxed">
+                  <strong className="text-gray-800 font-semibold block mb-0.5">
                     Mutual Agreement
                   </strong>
                   Both the client and the contractor must review and agree to
@@ -187,7 +325,7 @@ export default function EscrowStatusModal({ projectId, onClose }) {
               </li>
               <li className="flex items-start gap-3">
                 <span className="flex items-center justify-center w-5 h-5 rounded-full bg-[#16A34A]/10 text-[#16A34A] text-[10px] font-bold shrink-0 mt-0.5">
-                  2
+                  3
                 </span>
                 <p className="text-xs text-gray-600 leading-relaxed">
                   <strong className="text-gray-800 font-semibold block mb-0.5">
@@ -200,7 +338,7 @@ export default function EscrowStatusModal({ projectId, onClose }) {
               </li>
               <li className="flex items-start gap-3">
                 <span className="flex items-center justify-center w-5 h-5 rounded-full bg-[#16A34A]/10 text-[#16A34A] text-[10px] font-bold shrink-0 mt-0.5">
-                  3
+                  4
                 </span>
                 <p className="text-xs text-gray-600 leading-relaxed">
                   <strong className="text-gray-800 font-semibold block mb-0.5">

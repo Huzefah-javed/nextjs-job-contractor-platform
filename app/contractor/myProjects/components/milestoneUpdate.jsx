@@ -4,16 +4,19 @@ import React, { useState } from "react";
 import { CheckCircle2, Clock, X, AlertCircle } from "lucide-react";
 import { submitMilestoneAction } from "@/serverActions/submitMilestoneAction";
 import LoadingSpinner from "@/app/loading";
+import { escrowMilestone } from "@/helpers/escrowApisFunc";
 
 export default function MilestoneUpdateModal({
   milestones,
   escrowId,
+  transactionId,
+  contractorEmail,
   onUpdateStatus,
   onClose,
 }) {
   const [loading, setLoading] = useState(false);
 
-  async function handleProjectSubmit(milestoneId) {
+  async function handleProjectSubmit(milestoneId,escrowMilestoneId) {
     if (!escrowId) {
       console.error("escrow ID is not available.");
       return;
@@ -21,8 +24,13 @@ export default function MilestoneUpdateModal({
 
     try {
       setLoading(true);
-      const response = await submitMilestoneAction(escrowId, milestoneId);
-
+      const response = await submitMilestoneAction(
+        escrowId,
+        transactionId,
+        escrowMilestoneId,
+        milestoneId,
+        contractorEmail,
+      );
       if (response.success) {
         console.log("Success:", response.message);
         if (onUpdateStatus) onUpdateStatus();
@@ -129,7 +137,7 @@ export default function MilestoneUpdateModal({
                       <td className="px-6 py-4 text-right whitespace-nowrap">
                         {isUnderProgress ? (
                           <button
-                            onClick={() => handleProjectSubmit(milestone._id)}
+                            onClick={() => handleProjectSubmit(milestone._id, milestone.escrowMilestoneId)}
                             className="px-5 py-2.5 rounded-full font-medium text-xs transition-all inline-flex items-center justify-center gap-2 shadow-sm bg-[#16A34A] hover:bg-green-700 text-white cursor-pointer"
                           >
                             Submit Work

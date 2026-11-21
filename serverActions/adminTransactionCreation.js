@@ -2,7 +2,11 @@
 
 import { dbConnect } from "@/config/db.config";
 import { authAndGetUser } from "@/helpers/authAndGetUser";
-import { createTransaction } from "@/helpers/escrowApisFunc";
+import {
+  checkCustomerVerification,
+  createTransaction,
+  getTransactionUsersStatus,
+} from "@/helpers/escrowApisFunc";
 import { Escrow } from "@/schemas/escrow.schema";
 import { ProjectPost } from "@/schemas/project.schema";
 import { Proposal } from "@/schemas/proposal.schema";
@@ -34,6 +38,7 @@ export async function transactionCreationAction({
     const [client, contractor] = await Promise.all([
       users.findById(clientId, "email companyEmail"),
       users.findById(contractorId, "email companyEmail"),
+      Escrow.findOneAndDelete({ projectId }),
     ]);
     const contractorEmail = contractor?.email || contractor?.companyEmail;
     const clientEmail = client?.email || client?.companyEmail;
@@ -74,7 +79,7 @@ export async function transactionCreationAction({
       };
     }
 
-    const newEscrow = await Escrow.create({
+    const escrowData = {
       proposalId: selectedProposalId,
       projectId,
       transactionId: result.transactionId,
@@ -83,7 +88,16 @@ export async function transactionCreationAction({
       milestones,
       contractorId,
       clientId,
-    });
+    };
+
+    if (result.buyer_verification_required === false) {
+      escrowData.clientEscrowVerified = true;
+    }
+    if (result.seller_verification_required === false) {
+      escrowData.contractorEscrowVerified = true;
+    }
+
+    const newEscrow = await Escrow.create(escrowData);
     if (!newEscrow && !newEscrow._id) {
       return {
         success: false,
@@ -92,11 +106,11 @@ export async function transactionCreationAction({
     }
 
     await Promise.allSettled([
-      ProjectPost.findByIdAndUpdate(formattedProjectId, {
+      ProjectPost.findByIdAndUpdate(projectId, {
         projectPhase: "underEscrow",
         escrowId: newEscrow._id,
       }),
-      Proposal.findByIdAndUpdate(proposalId, {
+      Proposal.findByIdAndUpdate(selectedProposalId, {
         escrowId: newEscrow._id,
       }),
     ]);
@@ -108,11 +122,12 @@ export async function transactionCreationAction({
       transactionId: result.transactionId,
     };
   } catch (error) {
+    console.log(error);
     console.error("Error in adminTransactionCreation:");
-    console.error("Error in adminTransactionCreation:", error.response);
+    console.error("Error in adminTransactionCreation:", error?.response);
     console.error(
       "Error in adminTransactionCreation2:",
-      error.response.data.errors,
+      error?.response?.data?.errors,
     );
     return {
       success: false,

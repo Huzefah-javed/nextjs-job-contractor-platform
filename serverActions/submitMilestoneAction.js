@@ -3,9 +3,28 @@
 import { revalidatePath } from "next/cache";
 import { dbConnect } from "@/config/db.config";
 import { Escrow } from "@/schemas/escrow.schema";
+import { escrowMilestone } from "@/helpers/escrowApisFunc";
 
-export async function submitMilestoneAction(escrowId, milestoneId) {
+export async function submitMilestoneAction(
+  escrowId,
+  transactionId,
+  escrowMilestoneId,
+  milestoneId,
+  contractorEmail,
+) {
   try {
+    console.log(
+      "before res ",
+      escrowId,
+      transactionId,
+      contractorEmail,
+    );
+    const res = await escrowMilestone.shipMilestone(
+      transactionId,
+      escrowMilestoneId,
+      contractorEmail,
+    );
+    console.log("res ", res);
     await dbConnect();
     const updatedProject = await Escrow.findOneAndUpdate(
       {

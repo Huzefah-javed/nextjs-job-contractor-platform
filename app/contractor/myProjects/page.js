@@ -202,6 +202,8 @@ export default function MyProjectsPage() {
                         setUpdateOption({
                           milestones: milestones,
                           escrowId: item._id,
+                          transactionId: item.transactionId,
+                          contractorEmail: item.contractor?.email,
                         })
                       }
                       className="bg-[#16A34A] hover:bg-green-700 text-white px-6 py-2.5 rounded-full font-medium text-sm transition-colors cursor-pointer shadow-sm"
@@ -247,6 +249,8 @@ export default function MyProjectsPage() {
         <MilestoneUpdateModal
           escrowId={updateOption.escrowId}
           milestones={updateOption.milestones}
+          transactionId={updateOption.transactionId}
+          contractorEmail={updateOption.contractorEmail}
           // onUpdateStatus={(milestoneId) => {
           //   console.log(
           //     "Tell the backend that milestone ID is ready for client review:",

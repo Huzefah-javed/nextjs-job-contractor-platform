@@ -12,8 +12,10 @@ export async function projectEscrowDetails(projectId) {
 
     let selectedFields =
       "clientEscrowStatus proposalEscrowStatus transactionId";
-    if (res.role === "client") selectedFields += " clientNextUrl";
-    if (res.role === "contractor") selectedFields += " contractorNextUrl";
+    if (res.role === "client")
+      selectedFields += " clientNextUrl clientEscrowVerified";
+    if (res.role === "contractor")
+      selectedFields += " contractorNextUrl contractorEscrowVerified";
 
     const result = await Escrow.findOne({ projectId })
       .select(selectedFields)

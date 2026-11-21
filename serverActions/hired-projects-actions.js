@@ -63,9 +63,24 @@ export async function getHiredProjects(filter) {
         },
       },
       {
+        $lookup: {
+          from: "users",
+          localField: "contractorId",
+          foreignField: "_id",
+          as: "contractor",
+        },
+      },
+      {
+        $unwind: {
+          path: "$contractor",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
         $project: {
           _id: 1,
           milestones: 1,
+          transactionId: 1,
           createdAt: 1,
           project: {
             _id: "$project._id",
@@ -79,6 +94,11 @@ export async function getHiredProjects(filter) {
             estimatedDuration: "$proposal.estimatedDuration",
             contractorId: "$proposal.contractorId",
             status: "$proposal.status",
+          },
+          contractor: {
+            email: {
+              $ifNull: ["$contractor.email", "$contractor.companyEmail"],
+            },
           },
         },
       },
