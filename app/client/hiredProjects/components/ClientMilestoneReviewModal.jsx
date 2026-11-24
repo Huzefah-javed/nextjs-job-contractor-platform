@@ -9,17 +9,26 @@ export default function ClientMilestoneReviewModal({
   milestones,
   escrowId,
   onClose,
+  clientEmail,
+  transactionId,
   onUpdateStatus,
 }) {
   const [loading, setLoading] = useState(false);
 
-  async function handleMilestoneAction(milestoneId, newStatus) {
+  async function handleMilestoneAction(
+    milestoneId,
+    escrowMilestoneId,
+    newStatus,
+  ) {
     try {
       setLoading(true);
       const res = await updateMilestoneStatusAction(
         escrowId,
         milestoneId,
         newStatus,
+        clientEmail,
+        transactionId,
+        escrowMilestoneId,
       );
       if (res.success) {
         console.log(res.message);
@@ -137,6 +146,7 @@ export default function ClientMilestoneReviewModal({
                               onClick={() =>
                                 handleMilestoneAction(
                                   milestone._id,
+                                  milestone.escrowMilestoneId,
                                   "underProgress",
                                 )
                               }
@@ -147,7 +157,11 @@ export default function ClientMilestoneReviewModal({
                             </button>
                             <button
                               onClick={() =>
-                                handleMilestoneAction(milestone._id, "approved")
+                                handleMilestoneAction(
+                                  milestone._id,
+                                  milestone.escrowMilestoneId,
+                                  "approved",
+                                )
                               }
                               className="px-2.5 py-1 rounded-md font-medium text-[11px] bg-[#16A34A] hover:bg-green-700 text-white transition-colors cursor-pointer shadow-sm inline-flex items-center gap-1"
                               title="Approve & Complete"

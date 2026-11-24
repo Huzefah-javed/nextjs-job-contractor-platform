@@ -11,6 +11,8 @@ export default function ProjectCard({
   createdAt,
   escrowId,
   activeTab,
+  transactionId,
+  clientEmail,
   onReview,
 }) {
   const [showUpdateMilestones, setShowUpdateMilestones] = useState({});
@@ -101,6 +103,8 @@ export default function ProjectCard({
         <ClientMilestoneReviewModal
           milestones={showUpdateMilestones.milestones}
           escrowId={showUpdateMilestones.escrowId}
+          clientEmail={clientEmail}
+          transactionId={transactionId}
           onClose={() => setShowUpdateMilestones({})}
         />
       )}

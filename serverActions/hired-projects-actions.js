@@ -29,9 +29,8 @@ export async function getHiredProjects(filter) {
     }
     if (response.role === "client") query.clientId = userId;
     if (response.role === "contractor") query.contractorId = userId;
-    // query.isProjectCompleted = false;
-    console.log(query);
-    const projects = await Escrow.aggregate([
+
+    let projects = await Escrow.aggregate([
       { $match: query },
       { $sort: { createdAt: -1 } },
       {
@@ -77,6 +76,20 @@ export async function getHiredProjects(filter) {
         },
       },
       {
+        $lookup: {
+          from: "users",
+          localField: "clientId",
+          foreignField: "_id",
+          as: "client",
+        },
+      },
+      {
+        $unwind: {
+          path: "$client",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
         $project: {
           _id: 1,
           milestones: 1,
@@ -100,9 +113,19 @@ export async function getHiredProjects(filter) {
               $ifNull: ["$contractor.email", "$contractor.companyEmail"],
             },
           },
+          client: {
+            email: {
+              $ifNull: ["$client.email", "$client.companyEmail"],
+            },
+          },
         },
       },
     ]);
+
+    if (response.role === "client")
+      projects = projects.map((p) => ({...p, contractor : null}));
+    if (response.role === "contractor")
+      projects = projects.map((p) => ({...p, client : null}));
 
     return {
       success: true,

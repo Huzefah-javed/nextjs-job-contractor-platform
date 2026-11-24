@@ -13,18 +13,11 @@ export async function submitMilestoneAction(
   contractorEmail,
 ) {
   try {
-    console.log(
-      "before res ",
-      escrowId,
-      transactionId,
-      contractorEmail,
-    );
-    const res = await escrowMilestone.shipMilestone(
+   const res = await escrowMilestone.shipMilestone(
       transactionId,
       escrowMilestoneId,
       contractorEmail,
     );
-    console.log("res ", res);
     await dbConnect();
     const updatedProject = await Escrow.findOneAndUpdate(
       {

@@ -14,10 +14,6 @@ const escrowSchema = new mongoose.Schema(
       ],
       default: "termsPending",
     },
-    milestoneReleaseRequired: {
-      type: Boolean,
-      default: false,
-    },
     isProjectCompleted: {
       type: Boolean,
       default: false,

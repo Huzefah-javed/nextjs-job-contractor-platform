@@ -102,10 +102,12 @@ export default function HiredProjectsPage() {
                 project={escrow.project}
                 proposal={escrow.proposal}
                 milestones={escrow.milestones}
+                transactionId={escrow.transactionId}
                 createdAt={escrow.createdAt}
                 escrowId={escrow._id}
                 activeTab={activeTab}
                 onReview={handleReview}
+                clientEmail={escrow.client.email}
               />
             ))
           )}
