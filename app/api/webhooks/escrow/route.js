@@ -48,7 +48,7 @@ export async function POST(req) {
           { "milestones.$[elem].status": "approved" },
           {
             arrayFilters: [{ "elem.escrowMilestoneId": { $in: item_ids } }],
-            new: true,
+            returnDocument: "after",
           },
         );
 
