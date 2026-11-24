@@ -25,7 +25,6 @@ export default function HiredProjectsPage() {
       const res = await getHiredProjects(activeTab);
       if (res.success) {
         setEscrows(res.projects);
-        console.log(res);
       } else {
         setError(res.error);
       }

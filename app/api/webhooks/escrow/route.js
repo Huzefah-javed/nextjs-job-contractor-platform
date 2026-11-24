@@ -52,31 +52,35 @@ export async function POST(req) {
           },
         );
 
-        let approvedMilestones = response.milestones.filter(
+        break;
+
+      case "accept":
+        const res = await Escrow.findOneAndUpdate(
+          { transactionId: transaction_id },
+          { "milestones.$[elem].status": "completed" },
+          {
+            arrayFilters: [{ "elem.escrowMilestoneId": { $in: item_ids } }],
+            returnDocument: "after",
+          },
+        );
+
+        let approvedMilestones = res.milestones.filter(
           (p) => p.status === "approved",
         ).length;
-        let totalMilestones = response.milestones.length;
+        let totalMilestones = res.milestones.length;
 
         if (approvedMilestones === totalMilestones) {
           await Promise.all([
-            Escrow.findByIdAndUpdate(response._id, {
+            Escrow.findByIdAndUpdate(res._id, {
               isProjectCompleted: true,
             }),
             ProjectPost.findOneAndUpdate(
-              { escrowId: response._id },
+              { escrowId: res._id },
               { projectPhase: "completed" },
             ),
           ]);
         }
-
         break;
-
-      // case "cancelled":
-      //   await ProjectPost.findOneAndUpdate(
-      //     { transactionId: transaction_id },
-      //     { escrowStatus: "cancelled" },
-      //   );
-      //   break;
     }
 
     return NextResponse.json({ received: true }, { status: 200 });

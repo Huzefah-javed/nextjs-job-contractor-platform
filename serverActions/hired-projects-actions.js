@@ -22,6 +22,7 @@ export async function getHiredProjects(filter) {
     if (filter === "active") {
       query.clientEscrowStatus = "payment_approved";
       query.proposalEscrowStatus = "termsAccepted";
+      query.isProjectCompleted = false;
     } else if (filter === "escrowPending") {
       query.clientEscrowStatus = {
         $in: ["termsPending", "termsAccepted", "payment_sent"],
@@ -123,9 +124,9 @@ export async function getHiredProjects(filter) {
     ]);
 
     if (response.role === "client")
-      projects = projects.map((p) => ({...p, contractor : null}));
+      projects = projects.map((p) => ({ ...p, contractor: null }));
     if (response.role === "contractor")
-      projects = projects.map((p) => ({...p, client : null}));
+      projects = projects.map((p) => ({ ...p, client: null }));
 
     return {
       success: true,
