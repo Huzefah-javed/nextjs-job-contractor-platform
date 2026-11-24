@@ -16,7 +16,7 @@ export const createTransaction = async ({
       {
         amount: milestone.amount,
         payer_customer: "huzaifa@predawnsolutions.com" || buyerEmail,
-        beneficiary_customer: sellerEmail,
+        beneficiary_customer: "devbyhuzefah@gmail.com" || sellerEmail,
       },
     ],
   }));
@@ -29,7 +29,7 @@ export const createTransaction = async ({
       },
       {
         role: "seller",
-        customer: sellerEmail,
+        customer: "devbyhuzefah@gmail.com" || sellerEmail,
       },
       {
         role: "broker",
@@ -114,8 +114,6 @@ export async function checkCustomerVerification(customerEmail) {
 export async function getTransactionUsersStatus(transactionId) {
   const response = await escrowApi.get(`/transaction/${transactionId}`);
   const transaction = response.data;
-
-  console.log("nigga ", transaction);
 
   const parties = transaction?.parties || [];
 

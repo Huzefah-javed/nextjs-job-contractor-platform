@@ -90,6 +90,7 @@ const PROJECTS_DATA = [
 export default async function EscrowActivityPage() {
   const data = await getPendingEscrowProjectsAction();
   console.log(data);
+  
 
   return (
     <div className="min-h-screen bg-white text-[#1A1A1A] px-6 sm:px-10 py-8">

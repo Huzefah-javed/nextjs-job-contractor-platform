@@ -10,7 +10,7 @@ export async function POST(req) {
 
     await dbConnect();
 
-    const { event, transaction_id } = body;
+    const { event, transaction_id, item_ids } = body;
     console.log(body);
     switch (event) {
       case "agree":
@@ -34,13 +34,16 @@ export async function POST(req) {
           { clientEscrowStatus: "payment_approved", activeAt: new Date() },
         );
         break;
+      case "ship":
+        await Escrow.findOneAndUpdate(
+          { transactionId: transaction_id },
+          { "milestones.$[elem].status": "pending" },
+          {
+            arrayFilters: [{ "elem.escrowMilestoneId": { $in: item_ids } }],
+          },
+        );
 
-      // case "released":
-      //   await ProjectPost.findOneAndUpdate(
-      //     { transactionId: transaction_id },
-      //     { escrowStatus: "released", status: "completed" },
-      //   );
-      //   break;
+        break;
 
       // case "cancelled":
       //   await ProjectPost.findOneAndUpdate(

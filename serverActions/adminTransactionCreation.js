@@ -137,3 +137,35 @@ export async function transactionCreationAction({
     };
   }
 }
+
+export async function verifyCustomerEscrowStatus(transactionId, customerRole) {
+  try {
+    const result = await getTransactionUsersStatus(transactionId);
+    if (customerRole === result.client.role && result.clientEscrowVerified) {
+      await Escrow.findOneAndUpdate(
+        { transactionId },
+        { clientEscrowVerified: true },
+      );
+      return { success: true, isChange: true };
+    }
+    if (
+      customerRole === result.contractor.role &&
+      result.contractorEscrowVerified
+    ) {
+      await Escrow.findOneAndUpdate(
+        { transactionId },
+        { contractorEscrowVerified: true },
+      );
+      return { success: true, isChange: true };
+    }
+
+    return { success: true, isChange: false };
+  } catch (error) {
+    return {
+      success: false,
+      message:
+        error.message ||
+        "An unexpected error occurred during status confirming",
+    };
+  }
+}

@@ -12,12 +12,9 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { projectEscrowDetails } from "@/serverActions/projectEscrowDetails";
+import { verifyCustomerEscrowStatus } from "@/serverActions/adminTransactionCreation";
 
-export default function EscrowStatusModal({
-  projectId,
-  onClose,
-  onVerifyClick, // Optional handler if verification uses a custom modal/action
-}) {
+export default function EscrowStatusModal({ projectId, onClose }) {
   const [escrowData, setEscrowData] = useState({});
   const [checkingStatus, setCheckingStatus] = useState(false);
 
@@ -43,6 +40,27 @@ export default function EscrowStatusModal({
     fetchEscrowDetails();
   }, [fetchEscrowDetails]);
 
+  const handleCheckEscrowStatus = async () => {
+    const userRole = escrowData.clientNextUrl ? "buyer" : "seller";
+    const res = await verifyCustomerEscrowStatus(
+      escrowData.transactionId,
+      userRole,
+    );
+    if (res.success && res.isChange) {
+      if (userRole === "buyer") {
+        setEscrowData((prev) => ({ ...prev, clientEscrowVerified: true }));
+      }
+      if (userRole === "seller") {
+        setEscrowData((prev) => ({ ...prev, contractorEscrowVerified: true }));
+      }
+      console.log("change done");
+    } else if (res.success && !res.isChange) {
+      console.log("you are not verified on escrow till now");
+    } else {
+      console.log(res.message);
+    }
+  };
+
   // Detect which side's verification field is provided by the API
   const isContractorSide =
     typeof escrowData?.contractorEscrowVerified !== "undefined";
@@ -58,9 +76,7 @@ export default function EscrowStatusModal({
     ? "Contractor Escrow Verification"
     : "Client Escrow Verification";
 
-  const verificationUrl = isContractorSide
-    ? escrowData?.contractorVerificationUrl || escrowData?.contractorNextUrl
-    : escrowData?.clientVerificationUrl || escrowData?.clientNextUrl;
+  const verificationUrl = "www.escrow.com";
 
   const isClientAgreed = escrowData?.clientEscrowStatus !== "termsPending";
   const isContractorAgreed =
@@ -188,43 +204,19 @@ export default function EscrowStatusModal({
 
                     <td className="px-8 py-5 text-right">
                       <div className="inline-flex items-center justify-end gap-2">
-                        {!isEscrowVerified &&
-                          (onVerifyClick ? (
-                            <button
-                              onClick={onVerifyClick}
-                              className="inline-flex items-center gap-1.5 bg-[#16A34A] hover:bg-green-700 text-white px-3.5 py-1.5 rounded-full font-semibold text-xs transition-all cursor-pointer shadow-sm"
-                            >
+                        {!isEscrowVerified && (
+                          <div className="flex gap-2">
+                            <button className="inline-flex items-center gap-1.5 bg-[#16A34A] hover:bg-green-700 text-white px-3.5 py-1.5 rounded-full font-semibold text-xs transition-all cursor-pointer shadow-sm">
                               Verify Yourself
                             </button>
-                          ) : verificationUrl ? (
-                            <a
-                              href={verificationUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
+                            <button
+                              onClick={handleCheckEscrowStatus}
                               className="inline-flex items-center gap-1.5 bg-[#16A34A] hover:bg-green-700 text-white px-3.5 py-1.5 rounded-full font-semibold text-xs transition-all cursor-pointer shadow-sm"
                             >
-                              Verify Yourself
-                              <ExternalLink size={12} />
-                            </a>
-                          ) : (
-                            <span className="inline-flex items-center gap-1.5 bg-[#16A34A] text-white px-3.5 py-1.5 rounded-full font-semibold text-xs opacity-90">
-                              Verify Yourself
-                            </span>
-                          ))}
-
-                        <button
-                          onClick={fetchEscrowDetails}
-                          disabled={checkingStatus}
-                          className="inline-flex items-center gap-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 px-3.5 py-1.5 rounded-full font-semibold text-xs transition-all cursor-pointer border border-gray-200 disabled:opacity-50"
-                        >
-                          <RefreshCw
-                            size={12}
-                            className={checkingStatus ? "animate-spin" : ""}
-                          />
-                          {checkingStatus
-                            ? "Checking..."
-                            : "Check Your Escrow Status"}
-                        </button>
+                              Check Escrow Verification
+                            </button>
+                          </div>
+                        )}
                       </div>
                     </td>
                   </tr>
