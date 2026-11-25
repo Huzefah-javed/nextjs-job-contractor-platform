@@ -3,9 +3,12 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { logoutAction } from "@/serverActions/login";
+import { useRouter } from "next/navigation";
 
 export default function AdminSidebar() {
   const pathname = usePathname();
+  const router = useRouter();
 
   const menuItems = [
     { label: "Dashboard", href: "/admin/dashboard" },
@@ -13,6 +16,13 @@ export default function AdminSidebar() {
     { label: "Job Approvals", href: "/admin/jobApprovals" },
     { label: "Escrow fund release", href: "/admin/escrowRelease" },
   ];
+
+  const handleLogout = async () => {
+    const response = await logoutAction();
+    if (response.success) {
+      router.push("/login");
+    }
+  };
 
   return (
     <aside className="flex-[20%] max-h-screen h-screen sticky top-0 bg-white border-r border-gray-100 flex flex-col justify-between px-6 py-8 font-sans">
@@ -74,6 +84,25 @@ export default function AdminSidebar() {
           </svg>
           <span>Platform Settings</span>
         </Link>
+        <button
+          onClick={handleLogout}
+          className="flex items-center gap-2 text-sm font-semibold pl-2 text-[#EF4444] hover:text-red-700 transition-colors w-full text-left"
+        >
+          <svg
+            className="w-4 h-4 flex-shrink-0 rotate-180"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth="2.5"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75"
+            />
+          </svg>
+          <span>Logout</span>
+        </button>
       </div>
     </aside>
   );

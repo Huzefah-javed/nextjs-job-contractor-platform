@@ -127,7 +127,11 @@ export async function transactionCreationAction({
     console.error("Error in adminTransactionCreation:", error?.response);
     console.error(
       "Error in adminTransactionCreation2:",
-      error?.response?.data?.errors,
+      JSON.stringify(error?.response?.data?.errors, null, 2),
+    );
+    console.error(
+      "Escrow 422 details:",
+      JSON.stringify(error.response?.data, null, 2),
     );
     return {
       success: false,

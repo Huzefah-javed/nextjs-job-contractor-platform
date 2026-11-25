@@ -4,9 +4,13 @@ import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { logoutAction } from "@/serverActions/login";
+import { useRouter } from "next/navigation";
+
 
 export default function ClientSidebar() {
   const pathname = usePathname();
+  const router = useRouter();
 
   const menuItems = [
     { label: "Dashboard", href: "/client/dashboard" },
@@ -33,6 +37,13 @@ export default function ClientSidebar() {
       image: "/contractors/kevin.jpg",
     },
   ];
+
+   const handleLogout = async () =>{
+     const response =  await logoutAction();
+      if(response.success){
+        router.push("/login")
+      }
+    }
 
   return (
     <aside className="flex-[25%] h-screen sticky top-0 bg-white border-r border-gray-100 flex flex-col justify-between px-6 py-8 font-sans overflow-y-auto">
@@ -127,7 +138,10 @@ export default function ClientSidebar() {
             <span>Settings</span>
           </Link>
 
-          <button className="flex items-center gap-2 text-sm font-semibold pl-2 text-[#EF4444] hover:text-red-700 transition-colors w-full text-left">
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-2 text-sm font-semibold pl-2 text-[#EF4444] hover:text-red-700 transition-colors w-full text-left"
+          >
             <svg
               className="w-4 h-4 flex-shrink-0 rotate-180"
               fill="none"

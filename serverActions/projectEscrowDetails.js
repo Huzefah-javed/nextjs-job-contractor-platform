@@ -27,6 +27,9 @@ export async function projectEscrowDetails(projectId) {
     ) {
       result.paymentLink = `https://www.escrow-sandbox.com/transactions/${result?.transactionId}/payment`;
     }
+    if( result.clientEscrowStatus === "payment_sent"){
+      result.checkStatusLink = `https://www.escrow-sandbox.com/transactions/${result?.transactionId}`;
+    }
     return {
       success: true,
       data: result,

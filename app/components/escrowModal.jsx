@@ -101,17 +101,12 @@ export default function EscrowStatusModal({ projectId, onClose }) {
   const steps = [
     {
       step: 2,
-      label: "Client Agreed to Terms",
-      isCompleted: isClientAgreed,
-      actionText: "Client Action Required",
-      url: escrowData?.clientNextUrl,
-    },
-    {
-      step: 2,
-      label: "Contractor Agreed to Terms",
-      isCompleted: isContractorAgreed,
-      actionText: "Contractor Action Required",
-      url: escrowData?.contractorNextUrl,
+      label: "Client and Contractor Agreed to Terms",
+      isCompleted: isClientAgreed && isContractorAgreed,
+      infoText:
+        "Both need to agree the term, mutual agreement help in moving to next step",
+      actionText: "Action Required",
+      url: escrowData?.clientNextUrl || escrowData?.contractorNextUrl,
     },
     {
       step: 3,
@@ -125,14 +120,14 @@ export default function EscrowStatusModal({ projectId, onClose }) {
       label: "Client Payment Approved",
       isCompleted: isPaymentApproved,
       actionText: "View Status",
-      url: escrowData?.clientNextUrl,
+      url: escrowData?.checkStatusLink,
     },
   ];
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
       {/* Modal Container: Enforces 90vw width and 90vh max height */}
-      <div className="bg-white border border-gray-200 rounded-[24px] shadow-2xl w-[90vw] max-w-3xl max-h-[90vh] relative flex flex-col overflow-hidden">
+      <div className="bg-white border border-gray-200 rounded-[24px] shadow-2xl w-[90vw]  max-h-[90vh] relative flex flex-col overflow-hidden">
         {/* Header (Pinned) */}
         <div className="shrink-0 flex items-center justify-between px-8 py-6 border-b border-gray-100 bg-white">
           <div>
@@ -163,6 +158,7 @@ export default function EscrowStatusModal({ projectId, onClose }) {
                 <tr>
                   <th className="px-8 py-4">Requirement / Step</th>
                   <th className="px-8 py-4">Current Status</th>
+                  <th className="px-8 py-4">Information</th>
                   <th className="px-8 py-4 text-right">Action</th>
                 </tr>
               </thead>
@@ -253,6 +249,18 @@ export default function EscrowStatusModal({ projectId, onClose }) {
                         )}
                       </td>
 
+                      {step.step === currentPendingStep ? (
+                        <td className="px-2 py-5">
+                          <p
+                            className={`font-bold text-gray-400 text-[0.75rem] w-32`}
+                          >
+                            {step.infoText || "N/A"}
+                          </p>
+                        </td>
+                      ) : (
+                        "-"
+                      )}
+
                       <td className="px-8 py-5 text-right">
                         {isCurrentAction && step.url ? (
                           <a
@@ -303,6 +311,7 @@ export default function EscrowStatusModal({ projectId, onClose }) {
                   can proceed with contract terms and funding.
                 </p>
               </li>
+
               <li className="flex items-start gap-3">
                 <span className="flex items-center justify-center w-5 h-5 rounded-full bg-[#16A34A]/10 text-[#16A34A] text-[10px] font-bold shrink-0 mt-0.5">
                   2
@@ -312,33 +321,75 @@ export default function EscrowStatusModal({ projectId, onClose }) {
                     Mutual Agreement
                   </strong>
                   Both the client and the contractor must review and agree to
-                  the project terms before any funds can be moved.
+                  the project terms and fee breakdown before any funds can be
+                  moved.
                 </p>
               </li>
+
               <li className="flex items-start gap-3">
                 <span className="flex items-center justify-center w-5 h-5 rounded-full bg-[#16A34A]/10 text-[#16A34A] text-[10px] font-bold shrink-0 mt-0.5">
                   3
                 </span>
                 <p className="text-xs text-gray-600 leading-relaxed">
                   <strong className="text-gray-800 font-semibold block mb-0.5">
-                    Funding Eligibility
+                    Equal 50/50 Fee Split (Platform &amp; Escrow Fees)
                   </strong>
-                  Once both parties have agreed, the client becomes eligible to
-                  deposit the required milestone funds into the secure escrow
-                  account.
+                  Both the{" "}
+                  <strong className="text-gray-700 font-medium">
+                    15% platform broker fee
+                  </strong>{" "}
+                  (7.5% each) and the{" "}
+                  <strong className="text-gray-700 font-medium">
+                    Escrow.com processing fee
+                  </strong>{" "}
+                  (50% each) are divided equally between the client and the
+                  contractor. Because of this split, the client deposits
+                  slightly more than the base milestone amount, and the
+                  contractor receives slightly less after their half of the fees
+                  is deducted.
                 </p>
               </li>
+
               <li className="flex items-start gap-3">
                 <span className="flex items-center justify-center w-5 h-5 rounded-full bg-[#16A34A]/10 text-[#16A34A] text-[10px] font-bold shrink-0 mt-0.5">
                   4
                 </span>
                 <p className="text-xs text-gray-600 leading-relaxed">
                   <strong className="text-gray-800 font-semibold block mb-0.5">
-                    Approval & Activation
+                    Funding &amp; Deposit
+                  </strong>
+                  Once both parties agree, the client deposits the milestone
+                  funds along with their 50% share of the escrow and platform
+                  fees into the secure escrow account.
+                </p>
+              </li>
+
+              <li className="flex items-start gap-3">
+                <span className="flex items-center justify-center w-5 h-5 rounded-full bg-[#16A34A]/10 text-[#16A34A] text-[10px] font-bold shrink-0 mt-0.5">
+                  5
+                </span>
+                <p className="text-xs text-gray-600 leading-relaxed">
+                  <strong className="text-gray-800 font-semibold block mb-0.5">
+                    Approval &amp; Project Activation
                   </strong>
                   After a successful deposit, the payment is verified and
-                  approved. The project is then marked as active, and work can
-                  officially begin.
+                  approved. The project is marked as active, and the contractor
+                  can officially begin work.
+                </p>
+              </li>
+
+              <li className="flex items-start gap-3">
+                <span className="flex items-center justify-center w-5 h-5 rounded-full bg-[#16A34A]/10 text-[#16A34A] text-[10px] font-bold shrink-0 mt-0.5">
+                  6
+                </span>
+                <p className="text-xs text-gray-600 leading-relaxed">
+                  <strong className="text-gray-800 font-semibold block mb-0.5">
+                    Milestone Delivery &amp; Payout Release
+                  </strong>
+                  When a milestone is completed and confirmed as received, the
+                  client may accept it immediately or let the 1-day inspection
+                  period conclude—at which point Escrow.com releases the net
+                  payout to the contractor.
                 </p>
               </li>
             </ul>

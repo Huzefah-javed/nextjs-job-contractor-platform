@@ -27,7 +27,10 @@ export default async function middleware(request) {
       const response = await fetch(`${origin}/api/refreshToken`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: value.userId }),
+        body: JSON.stringify({
+          userId: value.userId,
+          sessionId: value.sessionId,
+        }),
       });
 
       if (!response.ok) {

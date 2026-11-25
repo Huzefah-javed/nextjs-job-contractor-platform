@@ -6,6 +6,9 @@ import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
 import bcrypt from "bcrypt";
 import { sessions } from "@/schemas/session.schema";
+import { redirect } from "next/dist/server/api-utils";
+import { authAndGetUser } from "@/helpers/authAndGetUser";
+import mongoose from "mongoose";
 
 export const loginUserAction = async (prevState, formData) => {
   const email = formData.get("email");
@@ -84,3 +87,29 @@ export const loginUserAction = async (prevState, formData) => {
     };
   }
 };
+
+export async function logoutAction() {
+  console.log("Running ........ ");
+  const cookieStore = await cookies();
+  try {
+    const res = await authAndGetUser();
+    console.log("Running 1 ........", res);
+    if (!res?.success) {
+      return {
+        success: false,
+        message: "Unauthorized access or Already Logout",
+      };
+    }
+    const anotherRes = await sessions.deleteMany({
+      userId: new mongoose.Types.ObjectId(res.id),
+    });
+    console.log("anotherRes: ", anotherRes);
+    cookieStore.delete("authCookie");
+    cookieStore.delete("sessionCookie");
+  } catch (error) {
+    console.log(error);
+    return { success: false, message: "something went wrong" };
+  } finally {
+    return { success: true, message: "Logout successfully" };
+  }
+}

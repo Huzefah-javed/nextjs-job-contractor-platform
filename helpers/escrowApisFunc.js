@@ -1,39 +1,164 @@
 import { escrowApi } from "@/config/escrow.config";
 
+// export const createTransaction = async ({
+//   sellerEmail,
+//   buyerEmail,
+//   inspectionPeriod,
+//   milestones,
+// }) => {
+//   const items = milestones.map((milestone) => ({
+//     title: milestone.title,
+//     description: milestone.title,
+//     type: "milestone",
+//     inspection_period: inspectionPeriod || 259200 * 5,
+//     quantity: 1,
+//     schedule: [
+//       {
+//         amount: milestone.amount,
+//         payer_customer: "huzaifa@predawnsolutions.com" || buyerEmail,
+//         beneficiary_customer: "devbyhuzefah@gmail.com" || sellerEmail,
+//       },
+//     ],
+//   }));
+
+//   const postData = {
+//     parties: [
+//       {
+//         role: "buyer",
+//         customer: "huzaifa@predawnsolutions.com" || buyerEmail,
+//       },
+//       {
+//         role: "seller",
+//         customer: "devbyhuzefah@gmail.com" || sellerEmail,
+//       },
+//       {
+//         role: "broker",
+//         customer: "huzefahjaved@gmail.com",
+//       },
+//     ],
+//     currency: "usd",
+//     description: milestones
+//       .map((a) => a.title)
+//       .join("-")
+//       .slice(0, 250),
+//     items,
+//   };
+
+//   const result = await escrowApi.post("/transaction", postData);
+
+//   console.log(result.data.parties);
+
+//   const data = {
+//     transactionId: result.data.id,
+//     buyerNextUrl: result.data.parties.filter((a) => a.role === "buyer")[0]
+//       ?.next_step,
+//     buyer_verification_required:
+//       result.data.parties.filter((a) => a.role === "buyer")[0]
+//         ?.verification_required || false,
+//     sellerNextUrl: result.data.parties.filter((a) => a.role === "seller")[0]
+//       ?.next_step,
+//     seller_verification_required:
+//       result.data.parties.filter((a) => a.role === "seller")[0]
+//         ?.verification_required || false,
+//     milestones: result.data.items.map((item) => ({
+//       id: item.id,
+//       title: item.title,
+//     })),
+//   };
+
+//   return data;
+// };
+
 export const createTransaction = async ({
   sellerEmail,
   buyerEmail,
   inspectionPeriod,
   milestones,
 }) => {
-  const items = milestones.map((milestone) => ({
+  const BUYER_EMAIL = "huzaifa@predawnsolutions.com" || buyerEmail;
+  const SELLER_EMAIL = "devbyhuzefah@gmail.com" || sellerEmail;
+  const BROKER_EMAIL = "huzefahjaved@gmail.com";
+
+  const effectiveInspectionPeriod = inspectionPeriod || 86400;
+
+  const BROKER_SHARE_RATE = 0.075;
+
+  const splitEscrowFees = [
+    {
+      payer_customer: BUYER_EMAIL,
+      split: 0.5,
+      type: "escrow",
+    },
+    {
+      payer_customer: SELLER_EMAIL,
+      split: 0.5,
+      type: "escrow",
+    },
+  ];
+
+  const milestoneItems = milestones.map((milestone) => ({
     title: milestone.title,
     description: milestone.title,
     type: "milestone",
-    inspection_period: inspectionPeriod || 259200 * 5,
+    inspection_period: effectiveInspectionPeriod,
     quantity: 1,
     schedule: [
       {
-        amount: milestone.amount,
-        payer_customer: "huzaifa@predawnsolutions.com" || buyerEmail,
-        beneficiary_customer: "devbyhuzefah@gmail.com" || sellerEmail,
+        amount: Number(milestone.amount),
+        payer_customer: BUYER_EMAIL,
+        beneficiary_customer: SELLER_EMAIL,
       },
     ],
+    fees: splitEscrowFees,
   }));
+
+  const brokerFeeItems = milestones.flatMap((milestone, idx) => {
+    const amount = Number(milestone.amount);
+    const halfBrokerFee = Number((amount * BROKER_SHARE_RATE).toFixed(2));
+
+    return [
+      {
+        title: `Broker Fee (Buyer 7.5%) - ${milestone.title || `Milestone ${idx + 1}`}`,
+        description: `50% of 15% broker commission paid by buyer for ${milestone.title || `Milestone ${idx + 1}`}`,
+        type: "broker_fee",
+        quantity: 1,
+        schedule: [
+          {
+            amount: halfBrokerFee,
+            payer_customer: BUYER_EMAIL,
+            beneficiary_customer: BROKER_EMAIL,
+          },
+        ],
+      },
+      {
+        title: `Broker Fee (Seller 7.5%) - ${milestone.title || `Milestone ${idx + 1}`}`,
+        description: `50% of 15% broker commission paid by seller for ${milestone.title || `Milestone ${idx + 1}`}`,
+        type: "broker_fee",
+        quantity: 1,
+        schedule: [
+          {
+            amount: halfBrokerFee,
+            payer_customer: SELLER_EMAIL,
+            beneficiary_customer: BROKER_EMAIL,
+          },
+        ],
+      },
+    ];
+  });
 
   const postData = {
     parties: [
       {
         role: "buyer",
-        customer: "huzaifa@predawnsolutions.com" || buyerEmail,
+        customer: BUYER_EMAIL,
       },
       {
         role: "seller",
-        customer: "devbyhuzefah@gmail.com" || sellerEmail,
+        customer: SELLER_EMAIL,
       },
       {
         role: "broker",
-        customer: "huzefahjaved@gmail.com",
+        customer: BROKER_EMAIL,
       },
     ],
     currency: "usd",
@@ -41,28 +166,24 @@ export const createTransaction = async ({
       .map((a) => a.title)
       .join("-")
       .slice(0, 250),
-    items,
+    items: [...milestoneItems, ...brokerFeeItems],
   };
 
   const result = await escrowApi.post("/transaction", postData);
 
-  console.log(result.data.parties);
+  const buyerParty = result.data.parties.find((a) => a.role === "buyer");
+  const sellerParty = result.data.parties.find((a) => a.role === "seller");
 
   const data = {
     transactionId: result.data.id,
-    buyerNextUrl: result.data.parties.filter((a) => a.role === "buyer")[0]
-      ?.next_step,
-    buyer_verification_required:
-      result.data.parties.filter((a) => a.role === "buyer")[0]
-        ?.verification_required || false,
-    sellerNextUrl: result.data.parties.filter((a) => a.role === "seller")[0]
-      ?.next_step,
-    seller_verification_required:
-      result.data.parties.filter((a) => a.role === "seller")[0]
-        ?.verification_required || false,
+    buyerNextUrl: buyerParty?.next_step,
+    buyer_verification_required: buyerParty?.verification_required || false,
+    sellerNextUrl: sellerParty?.next_step,
+    seller_verification_required: sellerParty?.verification_required || false,
     milestones: result.data.items.map((item) => ({
       id: item.id,
       title: item.title,
+      type: item.type,
     })),
   };
 
