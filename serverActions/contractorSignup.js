@@ -2,6 +2,7 @@
 
 import { dbConnect } from "@/config/db.config";
 import { uploadToCloud } from "@/helpers/cloud.upload";
+import { createEscrowCustomer } from "@/helpers/escrowApisFunc";
 import { users } from "@/schemas/user.schema";
 import { contractorSignupSchema } from "@/validations/contractor.signup.validation";
 import bcrypt from "bcrypt";
@@ -17,6 +18,7 @@ export const contractorSignupAction = async (prevState, formData) => {
     docNumber: formData.get("documentNumber"),
     specialization: formData.get("specialization"),
   };
+
   const result1 = await uploadToCloud(
     formData.get("documentFront"),
     "job_platform/freelancer_cred",
@@ -49,6 +51,10 @@ export const contractorSignupAction = async (prevState, formData) => {
     };
   }
   try {
+    await createEscrowCustomer({
+      email: form.email,
+      firstName: form.name,
+    });
     await dbConnect();
     const hashedPassword = await bcrypt.hash(result.data.password, 10);
 
@@ -69,7 +75,9 @@ export const contractorSignupAction = async (prevState, formData) => {
     return {
       success: false,
       errors: {},
-      message: "Something went wrong on our end. Please try again later.",
+      message:
+        error.message ||
+        "Something went wrong on our end. Please try again later.",
     };
   }
 };

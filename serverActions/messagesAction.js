@@ -33,13 +33,13 @@ export const MessageAction = async (
   }
 };
 
-export const MessageLoadAction = async (chatId) => {
+export const MessageLoadAction = async (chatId, pageNo = 1) => {
   const res = await authAndGetUser();
   if (!res.success) return { success: false };
-
+  const skip = pageNo * 20 - 20;
   try {
     await dbConnect();
-    const response = await Message.find({ chatId });
+    const response = await Message.find({ chatId }).limit(20).skip(skip);
     return { success: true, response: JSON.parse(JSON.stringify(response)) };
   } catch (error) {
     console.log(error);

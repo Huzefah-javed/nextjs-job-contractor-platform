@@ -281,3 +281,58 @@ export const escrowMilestone = {
   releaseMilestoneFunds: (txId, itemId, clientEmail) =>
     triggerMilestoneAction(txId, itemId, "accept", clientEmail),
 };
+
+export const createEscrowCustomer = async ({
+  email,
+  firstName,
+  lastName,
+  phoneNumber,
+}) => {
+  const payload = {
+    email: email.trim().toLowerCase(),
+  };
+  if (firstName && firstName.trim().length !== 0) {
+    payload.firstName = firstName.trim().toLowerCase();
+  }
+  if (lastName && lastName.trim().length !== 0) {
+    payload.firstName = lastName.trim().toLowerCase();
+  }
+  if (phoneNumber) {
+    payload.phoneNumber = phoneNumber;
+  }
+
+  try {
+    const response = await escrowApi.post("/customer", payload);
+    return {
+      success: true,
+      alreadyExists: false,
+      escrowCustomerId: response.data?.id || null,
+      data: response.data,
+    };
+  } catch (error) {
+    const status = error.response?.status;
+    const errorData = error.response?.data;
+    const serializedError = JSON.stringify(errorData || "").toLowerCase();
+
+    console.log(serializedError);
+
+    if (
+      status === 409 ||
+      serializedError.includes("already exists") ||
+      serializedError.includes("already registered") ||
+      serializedError.includes("duplicate")
+    ) {
+      return {
+        success: true,
+        alreadyExists: true,
+        escrowCustomerId: null,
+      };
+    }
+
+    throw new Error(
+      errorData?.error ||
+        JSON.stringify(errorData?.errors) ||
+        "Failed to register customer on Escrow.com",
+    );
+  }
+};

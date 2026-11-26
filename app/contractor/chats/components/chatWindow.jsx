@@ -18,14 +18,33 @@ export default function ChatWindow({ active, setMessages, messages }) {
   const [projectMilestoneModalStatus, setProjectMilestoneModalStatus] =
     useState(false);
   const [processingId, setProcessingId] = useState(null);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [page, setPage] = useState(1);
+
   useEffect(() => {
     async function fetchMsgs() {
-      const res = await MessageLoadAction(active.chatId);
-      if (res.success) setMessages(res.response);
+      try {
+        setIsLoadingMore(true);
+        const res = await MessageLoadAction(active.chatId, page);
+        if (res.success)
+          if (res.response.length !== 0) {
+            if (res.response[0].chatId === messages[0]?.chatId) {
+              setMessages((prev) => [...res.response, ...prev]);
+            } else {
+              setMessages(res.response);
+            }
+          }
+      } catch (e) {
+        console.log("error: ", e.message);
+      } finally {
+        setIsLoadingMore(false);
+      }
     }
     fetchMsgs();
     return () => readMsgAction(active.chatId, active.contractorId);
-  }, [active]);
+  }, [active.chatId, page]);
+
+  const handleLoadMoreMessages = () => setPage((prev) => prev + 1);
 
   const handleSend = async (e) => {
     e.preventDefault();
@@ -88,7 +107,12 @@ export default function ChatWindow({ active, setMessages, messages }) {
     }
   };
 
-  if (!active) return null;
+  if (!active.chatId)
+    return (
+      <div className="flex-2 text-slate-400 border flex justify-center items-center border-slate-200/80 rounded-[2rem] bg-white p-6 shadow-sm flex-col">
+        Open chat to message
+      </div>
+    );
   return (
     <div className="flex-2 border border-slate-200/80 rounded-[2rem] bg-white p-6 shadow-sm flex flex-col justify-between ">
       <div className="flex items-center gap-3 pb-4 border-b border-slate-100">
@@ -106,6 +130,16 @@ export default function ChatWindow({ active, setMessages, messages }) {
       </div>
 
       <div className="flex-1 py-6 overflow-y-auto space-y-5">
+        <div className=" flex justify-center py-2 pointer-events-none">
+          <button
+            type="button"
+            onClick={handleLoadMoreMessages}
+            disabled={isLoadingMore}
+            className="pointer-events-auto bg-white hover:bg-gray-50 disabled:opacity-60 text-gray-700 border border-gray-200 px-5 py-2 rounded-full text-xs font-semibold shadow-sm hover:shadow transition-all cursor-pointer disabled:cursor-not-allowed flex items-center gap-2"
+          >
+            {isLoadingMore ? "Loading messages..." : "Load more messages"}
+          </button>
+        </div>
         {messages &&
           messages?.map((msg) => {
             const isMe = msg.senderId === active.contractorId;
